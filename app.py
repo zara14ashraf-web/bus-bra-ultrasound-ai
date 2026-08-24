@@ -1059,23 +1059,20 @@ if sample_image is not None:
 
         with g1:
 
-            st.image(
-                gradcam_overlay,
-                caption=(
-                    "Grad-CAM — model attention"
-                ),
-                use_container_width=True
-            )
+    st.image(
+        gradcam_overlay,
+        caption="Grad-CAM — model attention",
+        width=320
+    )
 
-        with g2:
+with g2:
 
-            st.image(
-                crop_image,
-                caption=(
-                    "Lesion-focused model input"
-                ),
-                use_container_width=True
-            )
+    st.image(
+        crop_image,
+        caption="Lesion-focused model input",
+        width=320
+    )
+              
 
         st.caption(
             "Grad-CAM highlights image regions "
