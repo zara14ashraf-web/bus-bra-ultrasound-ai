@@ -8,7 +8,9 @@ import streamlit as st
 from PIL import Image
 from torchvision import transforms
 
-from model import SharedDualEfficientNetB3
+import model
+
+SharedDualEfficientNetB3 = model.SharedDualEfficientNetB3
 
 
 # ============================================================
