@@ -1,4 +1,4 @@
-```python
+python
 import os
 import json
 import requests
@@ -624,4 +624,4 @@ st.caption(
     "BUS-BRA Dual-View Breast Ultrasound AI "
     "Research Prototype"
 )
-```
+
