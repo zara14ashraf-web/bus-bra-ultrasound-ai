@@ -1,0 +1,7 @@
+```text
+streamlit
+torch
+torchvision
+timm
+Pillow
+```
