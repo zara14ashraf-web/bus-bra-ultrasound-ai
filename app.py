@@ -1,5 +1,4 @@
 import os
-import json
 import requests
 
 import numpy as np
@@ -32,11 +31,6 @@ BASE_DIR = os.path.dirname(
     os.path.abspath(__file__)
 )
 
-CONFIG_PATH = os.path.join(
-    BASE_DIR,
-    "deployment_config.json"
-)
-
 CHECKPOINT_PATH = os.path.join(
     BASE_DIR,
     "best_dual_effnet_b3.pth"
@@ -60,11 +54,6 @@ HF_CHECKPOINT_URL = (
 
 MODEL_NAME = "SharedDualEfficientNetB3"
 
-CLASSES = [
-    "Benign",
-    "Malignant"
-]
-
 IMAGE_SIZE = 300
 
 THRESHOLD = 0.52
@@ -85,82 +74,42 @@ STD = [
 
 
 # ============================================================
-# SAMPLE IMAGE CONFIGURATION
+# BUS-BRA SAMPLE CASES
 # ============================================================
 
 SAMPLES = {
 
-    "Sample 1 — Benign":
-        {
-            "image":
-                "sample_1_bus_0002-l.png",
+    "Sample 1 — Benign": {
+        "image": "sample_1_bus_0002-l.png",
+        "mask": "sample_1_bus_0002-l_MASK.png",
+        "bbox": [134, 142, 88, 50],
+        "label": "Benign",
+        "histology": "fibroadenoma"
+    },
 
-            "mask":
-                "sample_1_bus_0002-l_MASK.png",
+    "Sample 2 — Benign": {
+        "image": "sample_2_bus_0002-r.png",
+        "mask": "sample_2_bus_0002-r_MASK.png",
+        "bbox": [113, 143, 68, 47],
+        "label": "Benign",
+        "histology": "fibroadenoma"
+    },
 
-            "bbox":
-                [134, 142, 88, 50],
+    "Sample 3 — Malignant": {
+        "image": "sample_3_bus_0001-l.png",
+        "mask": "sample_3_bus_0001-l_MASK.png",
+        "bbox": [91, 24, 103, 79],
+        "label": "Malignant",
+        "histology": "invasive ductal carcinoma"
+    },
 
-            "label":
-                "Benign",
-
-            "histology":
-                "fibroadenoma"
-        },
-
-    "Sample 2 — Benign":
-        {
-            "image":
-                "sample_2_bus_0002-r.png",
-
-            "mask":
-                "sample_2_bus_0002-r_MASK.png",
-
-            "bbox":
-                [113, 143, 68, 47],
-
-            "label":
-                "Benign",
-
-            "histology":
-                "fibroadenoma"
-        },
-
-    "Sample 3 — Malignant":
-        {
-            "image":
-                "sample_3_bus_0001-l.png",
-
-            "mask":
-                "sample_3_bus_0001-l_MASK.png",
-
-            "bbox":
-                [91, 24, 103, 79],
-
-            "label":
-                "Malignant",
-
-            "histology":
-                "invasive ductal carcinoma"
-        },
-
-    "Sample 4 — Malignant":
-        {
-            "image":
-                "sample_4_bus_0001-r.png",
-
-            "mask":
-                "sample_4_bus_0001-r_MASK.png",
-
-            "bbox":
-                [102, 24, 82, 79],
-
-            "label":
-                "Malignant",
-
-            "histology":
-                "invasive ductal carcinoma"
-        }
+    "Sample 4 — Malignant": {
+        "image": "sample_4_bus_0001-r.png",
+        "mask": "sample_4_bus_0001-r_MASK.png",
+        "bbox": [102, 24, 82, 79],
+        "label": "Malignant",
+        "histology": "invasive ductal carcinoma"
+    }
 }
 
 
@@ -176,14 +125,12 @@ device = torch.device(
 
 
 # ============================================================
-# DOWNLOAD CHECKPOINT
+# DOWNLOAD MODEL
 # ============================================================
 
 def download_checkpoint():
 
-    if os.path.exists(
-        CHECKPOINT_PATH
-    ):
+    if os.path.exists(CHECKPOINT_PATH):
         return
 
     with st.spinner(
@@ -230,22 +177,15 @@ def load_model():
         weights_only=False
     )
 
-    if isinstance(
-        checkpoint,
-        dict
-    ):
+    if isinstance(checkpoint, dict):
 
         if "state_dict" in checkpoint:
 
-            state_dict = checkpoint[
-                "state_dict"
-            ]
+            state_dict = checkpoint["state_dict"]
 
         elif "model_state_dict" in checkpoint:
 
-            state_dict = checkpoint[
-                "model_state_dict"
-            ]
+            state_dict = checkpoint["model_state_dict"]
 
         else:
 
@@ -260,9 +200,7 @@ def load_model():
         strict=True
     )
 
-    model = model.to(
-        device
-    )
+    model = model.to(device)
 
     model.eval()
 
@@ -274,12 +212,8 @@ def load_model():
 # ============================================================
 
 transform = transforms.Compose([
-
     transforms.Resize(
-        (
-            IMAGE_SIZE,
-            IMAGE_SIZE
-        )
+        (IMAGE_SIZE, IMAGE_SIZE)
     ),
 
     transforms.ToTensor(),
@@ -298,7 +232,7 @@ transform = transforms.Compose([
 def make_lesion_crop(
     image,
     bbox,
-    margin=0.25
+    margin=CROP_MARGIN
 ):
 
     x, y, width, height = [
@@ -308,13 +242,8 @@ def make_lesion_crop(
 
     image_width, image_height = image.size
 
-    pad_x = int(
-        width * margin
-    )
-
-    pad_y = int(
-        height * margin
-    )
+    pad_x = int(width * margin)
+    pad_y = int(height * margin)
 
     x1 = max(
         0,
@@ -337,17 +266,12 @@ def make_lesion_crop(
     )
 
     return image.crop(
-        (
-            x1,
-            y1,
-            x2,
-            y2
-        )
+        (x1, y1, x2, y2)
     )
 
 
 # ============================================================
-# DRAW BBOX
+# DRAW BOUNDING BOX
 # ============================================================
 
 def draw_bbox(
@@ -357,9 +281,7 @@ def draw_bbox(
 
     output = image.copy()
 
-    draw = ImageDraw.Draw(
-        output
-    )
+    draw = ImageDraw.Draw(output)
 
     x, y, width, height = [
         int(v)
@@ -374,14 +296,14 @@ def draw_bbox(
             y + height
         ],
         outline="red",
-        width=4
+        width=3
     )
 
     return output
 
 
 # ============================================================
-# GROUND TRUTH MASK OVERLAY
+# GROUND-TRUTH MASK OVERLAY
 # ============================================================
 
 def create_mask_overlay(
@@ -389,97 +311,170 @@ def create_mask_overlay(
     mask
 ):
 
+    image = image.convert("RGB")
+
+    mask = mask.convert("L")
+
+    if mask.size != image.size:
+
+        mask = mask.resize(
+            image.size
+        )
+
     image_array = np.array(
         image
     ).astype(
         np.float32
     )
 
-    mask_array = np.array(
-        mask.convert("L")
+    mask_array = np.array(mask)
+
+    mask_binary = mask_array > 0
+
+    if not mask_binary.any():
+
+        return image
+
+    output = image_array.copy()
+
+    output[mask_binary, 0] = 255
+    output[mask_binary, 1] *= 0.35
+    output[mask_binary, 2] *= 0.35
+
+    output = (
+        0.65 * image_array
+        + 0.35 * output
     )
 
-    if mask_array.max() > 0:
+    output = np.clip(
+        output,
+        0,
+        255
+    ).astype(
+        np.uint8
+    )
 
-        mask_binary = (
-            mask_array > 0
+    return Image.fromarray(output)
+
+
+# ============================================================
+# GRAD-CAM
+# ============================================================
+
+class GradCAM:
+
+    def __init__(
+        self,
+        model,
+        target_layer
+    ):
+
+        self.model = model
+        self.target_layer = target_layer
+
+        self.activations = None
+        self.gradients = None
+
+        self.forward_hook = (
+            target_layer.register_forward_hook(
+                self._save_activation
+            )
         )
 
-        overlay = image_array.copy()
-
-        # Red mask overlay
-        overlay[
-            mask_binary,
-            0
-        ] = 255
-
-        overlay[
-            mask_binary,
-            1
-        ] *= 0.35
-
-        overlay[
-            mask_binary,
-            2
-        ] *= 0.35
-
-        output = (
-            0.65 * image_array
-            + 0.35 * overlay
+        self.backward_hook = (
+            target_layer.register_full_backward_hook(
+                self._save_gradient
+            )
         )
 
-        output = np.clip(
-            output,
+    def _save_activation(
+        self,
+        module,
+        inputs,
+        output
+    ):
+
+        self.activations = output
+
+    def _save_gradient(
+        self,
+        module,
+        grad_input,
+        grad_output
+    ):
+
+        self.gradients = grad_output[0]
+
+    def generate(
+        self,
+        full_tensor,
+        crop_tensor,
+        target_class
+    ):
+
+        self.model.zero_grad(
+            set_to_none=True
+        )
+
+        logits = self.model(
+            full_tensor,
+            crop_tensor
+        )
+
+        score = logits[
             0,
-            255
-        ).astype(
-            np.uint8
+            target_class
+        ]
+
+        score.backward()
+
+        activations = self.activations
+        gradients = self.gradients
+
+        weights = gradients.mean(
+            dim=(2, 3),
+            keepdim=True
         )
 
-        return Image.fromarray(
-            output
+        cam = (
+            weights * activations
+        ).sum(
+            dim=1,
+            keepdim=True
         )
 
-    return image
+        cam = F.relu(cam)
 
-
-        # ----------------------------------------------------
-        # GRAD-CAM
-        # ----------------------------------------------------
-
-        st.subheader(
-            "Grad-CAM Attention"
+        cam = F.interpolate(
+            cam,
+            size=(
+                IMAGE_SIZE,
+                IMAGE_SIZE
+            ),
+            mode="bilinear",
+            align_corners=False
         )
 
-        g1, g2 = st.columns(2)
+        cam = cam[
+            0,
+            0
+        ]
 
-        with g1:
+        cam = cam.detach().cpu().numpy()
 
-            st.image(
-                gradcam_overlay,
-                caption="Grad-CAM — model attention",
-                width=320
-            )
+        cam -= cam.min()
 
-        with g2:
+        if cam.max() > 0:
 
-            st.image(
-                crop_image,
-                caption="Lesion-focused model input",
-                width=320
-            )
+            cam /= cam.max()
 
-        st.caption(
-            "Grad-CAM highlights image regions "
-            "that contributed most strongly to "
-            "the selected model prediction."
-        )
+        return cam
 
-    
+    def remove_hooks(self):
 
-      
-   
-      
+        self.forward_hook.remove()
+        self.backward_hook.remove()
+
 
 # ============================================================
 # GRAD-CAM OVERLAY
@@ -491,10 +486,7 @@ def create_gradcam_overlay(
 ):
 
     image_resized = image.resize(
-        (
-            IMAGE_SIZE,
-            IMAGE_SIZE
-        )
+        (IMAGE_SIZE, IMAGE_SIZE)
     )
 
     image_array = np.array(
@@ -509,9 +501,6 @@ def create_gradcam_overlay(
         np.uint8
     )
 
-    # Simple heatmap:
-    # high activation -> red
-    # low activation -> blue
     heatmap = np.zeros(
         (
             IMAGE_SIZE,
@@ -567,23 +556,18 @@ def predict(
         image
     ).unsqueeze(
         0
-    ).to(
-        device
-    )
+    ).to(device)
 
     crop_image = make_lesion_crop(
         image,
-        lesion_box,
-        CROP_MARGIN
+        lesion_box
     )
 
     crop_tensor = transform(
         crop_image
     ).unsqueeze(
         0
-    ).to(
-        device
-    )
+    ).to(device)
 
     with torch.no_grad():
 
@@ -612,25 +596,16 @@ def predict(
     )
 
     return {
-        "prediction":
-            prediction,
-
-        "benign_probability":
-            benign_probability,
-
-        "malignant_probability":
-            malignant_probability,
-
-        "full_tensor":
-            full_tensor,
-
-        "crop_tensor":
-            crop_tensor
+        "prediction": prediction,
+        "benign_probability": benign_probability,
+        "malignant_probability": malignant_probability,
+        "full_tensor": full_tensor,
+        "crop_tensor": crop_tensor
     }, crop_image
 
 
 # ============================================================
-# RUN GRAD-CAM
+# GENERATE GRAD-CAM
 # ============================================================
 
 def generate_gradcam(
@@ -673,15 +648,14 @@ st.title(
 )
 
 st.write(
-    "Dual-view EfficientNet-B3 model "
-    "for benign vs malignant breast "
-    "ultrasound classification with "
-    "lesion localization and explainability."
+    "Dual-view EfficientNet-B3 for "
+    "benign vs malignant breast "
+    "ultrasound classification."
 )
 
 st.info(
-    "Research prototype — this tool is "
-    "not a clinical diagnostic system."
+    "Research prototype — not a clinical "
+    "diagnostic system."
 )
 
 
@@ -705,7 +679,7 @@ except Exception as e:
 
 
 # ============================================================
-# SAMPLE IMAGES
+# SAMPLE CASES
 # ============================================================
 
 st.header(
@@ -713,24 +687,17 @@ st.header(
 )
 
 st.write(
-    "These four cases come directly from "
-    "the BUS-BRA dataset and include their "
-    "ground-truth lesion masks."
-)
-
-
-sample_names = list(
-    SAMPLES.keys()
+    "Select a BUS-BRA case to view the "
+    "AI prediction, lesion localization, "
+    "ground-truth mask and Grad-CAM."
 )
 
 selected_sample = st.selectbox(
-    "Choose a sample case",
-    sample_names
+    "Select sample",
+    list(SAMPLES.keys())
 )
 
-sample = SAMPLES[
-    selected_sample
-]
+sample = SAMPLES[selected_sample]
 
 sample_image_path = os.path.join(
     BASE_DIR,
@@ -743,263 +710,250 @@ sample_mask_path = os.path.join(
 )
 
 
-if os.path.exists(
-    sample_image_path
-):
+# ============================================================
+# LOAD SAMPLE IMAGE
+# ============================================================
 
-    sample_image = Image.open(
-        sample_image_path
-    ).convert("RGB")
+if not os.path.exists(sample_image_path):
 
-else:
-
-    sample_image = None
-
-    st.warning(
+    st.error(
         f"Sample image not found: "
         f"{sample['image']}"
     )
 
+    st.stop()
 
-if os.path.exists(
-    sample_mask_path
-):
+sample_image = Image.open(
+    sample_image_path
+).convert("RGB")
+
+
+# ============================================================
+# LOAD SAMPLE MASK
+# ============================================================
+
+sample_mask = None
+
+if os.path.exists(sample_mask_path):
 
     sample_mask = Image.open(
         sample_mask_path
     ).convert("L")
-
-else:
-
-    sample_mask = None
-
-    st.warning(
-        f"Ground-truth mask not found: "
-        f"{sample['mask']}"
-    )
 
 
 # ============================================================
 # SAMPLE ANALYSIS
 # ============================================================
 
-if sample_image is not None:
+bbox = sample["bbox"]
 
-    bbox = sample["bbox"]
+try:
 
-    try:
-
-        result, crop_image = predict(
-            model,
-            sample_image,
-            bbox
-        )
-
-        prediction = result[
-            "prediction"
-        ]
-
-        benign_probability = result[
-            "benign_probability"
-        ]
-
-        malignant_probability = result[
-            "malignant_probability"
-        ]
-
-        full_tensor = result[
-            "full_tensor"
-        ]
-
-        crop_tensor = result[
-            "crop_tensor"
-        ]
-
-        predicted_class = (
-            1
-            if prediction == "Malignant"
-            else 0
-        )
-
-        cam = generate_gradcam(
-            model,
-            full_tensor,
-            crop_tensor,
-            predicted_class
-        )
-
-        gradcam_overlay = (
-            create_gradcam_overlay(
-                sample_image,
-                cam
-            )
-        )
-
-        bbox_image = draw_bbox(
-            sample_image,
-            bbox
-        )
-
-        # ----------------------------------------------------
-        # CASE INFORMATION
-        # ----------------------------------------------------
-
-        st.subheader(
-            "Case Information"
-        )
-
-        info_col1, info_col2, info_col3 = (
-            st.columns(3)
-        )
-
-        with info_col1:
-
-            st.write(
-                f"**Pathology:** "
-                f"{sample['label']}"
-            )
-
-        with info_col2:
-
-            st.write(
-                f"**Histology:** "
-                f"{sample['histology']}"
-            )
-
-        with info_col3:
-
-            st.write(
-                f"**BBOX:** "
-                f"{bbox}"
-            )
-
-        # ----------------------------------------------------
-        # PREDICTION
-        # ----------------------------------------------------
-
-        st.subheader(
-            "AI Prediction"
-        )
-
-        if prediction == "Malignant":
-
-            st.error(
-                f"Prediction: {prediction}"
-            )
-
-        else:
-
-            st.success(
-                f"Prediction: {prediction}"
-            )
-
-        p1, p2 = st.columns(2)
-
-        with p1:
-
-            st.metric(
-                "Benign probability",
-                f"{benign_probability * 100:.2f}%"
-            )
-
-        with p2:
-
-            st.metric(
-                "Malignant probability",
-                f"{malignant_probability * 100:.2f}%"
-            )
-
-        # ----------------------------------------------------
-        # VISUAL EXPLANATION
-        # ----------------------------------------------------
-
-        st.subheader(
-            "Visual Explanation"
-        )
-
-        c1, c2, c3 = st.columns(3)
-
-        with c1:
-
-            st.image(
-                sample_image,
-                caption="Original ultrasound",
-                use_container_width=True
-            )
-
-        with c2:
-
-            st.image(
-                bbox_image,
-                caption="Lesion bounding box",
-                use_container_width=True
-            )
-
-        with c3:
-
-            if sample_mask is not None:
-
-                st.image(
-                    create_mask_overlay(
-                        sample_image,
-                        sample_mask
-                    ),
-                    caption="Ground-truth lesion mask",
-                    use_container_width=True
-                )
-
-            else:
-
-                st.image(
-                    sample_image,
-                    caption="Ground-truth mask unavailable",
-                    use_container_width=True
-                )
-
-        # ----------------------------------------------------
-        # GRAD-CAM
-        # ----------------------------------------------------
-
-        st.subheader(
-            "Grad-CAM Attention"
-        )
-
-        g1, g2 = st.columns(2)
-
-        with g1:
-
-    st.image(
-        gradcam_overlay,
-        caption="Grad-CAM — model attention",
-        width=320
+    result, crop_image = predict(
+        model,
+        sample_image,
+        bbox
     )
 
-with g2:
+    prediction = result["prediction"]
 
-    st.image(
-        crop_image,
-        caption="Lesion-focused model input",
-        width=320
+    benign_probability = (
+        result["benign_probability"]
     )
-              
 
-        st.caption(
-            "Grad-CAM highlights image regions "
-            "that contributed most strongly to "
-            "the selected model prediction."
+    malignant_probability = (
+        result["malignant_probability"]
+    )
+
+    full_tensor = result["full_tensor"]
+
+    crop_tensor = result["crop_tensor"]
+
+    predicted_class = (
+        1
+        if prediction == "Malignant"
+        else 0
+    )
+
+    cam = generate_gradcam(
+        model,
+        full_tensor,
+        crop_tensor,
+        predicted_class
+    )
+
+    gradcam_overlay = (
+        create_gradcam_overlay(
+            sample_image,
+            cam
         )
+    )
 
-    except Exception as e:
+    bbox_image = draw_bbox(
+        sample_image,
+        bbox
+    )
 
-        st.error(
-            "Sample analysis failed."
-        )
+except Exception as e:
 
-        st.exception(e)
+    st.error(
+        "Sample analysis failed."
+    )
+
+    st.exception(e)
+
+    st.stop()
 
 
 # ============================================================
-# UPLOAD SECTION
+# CASE INFORMATION
+# ============================================================
+
+st.subheader(
+    "Case Information"
+)
+
+info1, info2, info3 = st.columns(3)
+
+with info1:
+
+    st.write(
+        f"**Pathology:** {sample['label']}"
+    )
+
+with info2:
+
+    st.write(
+        f"**Histology:** {sample['histology']}"
+    )
+
+with info3:
+
+    st.write(
+        f"**BBOX:** {bbox}"
+    )
+
+
+# ============================================================
+# PREDICTION
+# ============================================================
+
+st.subheader(
+    "AI Prediction"
+)
+
+if prediction == "Malignant":
+
+    st.error(
+        f"Prediction: {prediction}"
+    )
+
+else:
+
+    st.success(
+        f"Prediction: {prediction}"
+    )
+
+
+p1, p2 = st.columns(2)
+
+with p1:
+
+    st.metric(
+        "Benign probability",
+        f"{benign_probability * 100:.2f}%"
+    )
+
+with p2:
+
+    st.metric(
+        "Malignant probability",
+        f"{malignant_probability * 100:.2f}%"
+    )
+
+
+# ============================================================
+# VISUAL EXPLANATION
+# ============================================================
+
+st.subheader(
+    "Visual Explanation"
+)
+
+v1, v2 = st.columns(2)
+
+with v1:
+
+    st.image(
+        sample_image,
+        caption="Original ultrasound",
+        width=280
+    )
+
+with v2:
+
+    st.image(
+        bbox_image,
+        caption="Lesion bounding box",
+        width=280
+    )
+
+
+v3, v4 = st.columns(2)
+
+with v3:
+
+    if sample_mask is not None:
+
+        mask_overlay = create_mask_overlay(
+            sample_image,
+            sample_mask
+        )
+
+        st.image(
+            mask_overlay,
+            caption="Ground-truth lesion mask",
+            width=280
+        )
+
+    else:
+
+        st.warning(
+            "Ground-truth mask unavailable."
+        )
+
+with v4:
+
+    st.image(
+        gradcam_overlay,
+        caption="Grad-CAM model attention",
+        width=280
+    )
+
+
+# ============================================================
+# LESION-FOCUSED CROP
+# ============================================================
+
+st.subheader(
+    "Lesion-Focused Model Input"
+)
+
+st.image(
+    crop_image,
+    caption="BBOX-based lesion crop",
+    width=280
+)
+
+st.caption(
+    "Grad-CAM shows regions that contributed "
+    "to the selected prediction. The ground-truth "
+    "mask shows the annotated lesion region."
+)
+
+
+# ============================================================
+# UPLOAD YOUR OWN IMAGE
 # ============================================================
 
 st.divider()
@@ -1024,81 +978,83 @@ if uploaded_file is not None:
         uploaded_file
     ).convert("RGB")
 
+    width, height = image.size
+
     st.image(
         image,
         caption="Uploaded ultrasound",
-        use_container_width=True
+        width=420
     )
-
-    width, height = image.size
 
     st.caption(
         f"Image size: {width} × {height} pixels"
     )
 
     st.subheader(
-        "Define Lesion Region"
+        "Define Lesion Bounding Box"
     )
 
     st.write(
-        "Enter the lesion bounding-box "
-        "coordinates in the original image."
+        "Enter X, Y, width and height "
+        "of the lesion."
     )
 
     col1, col2 = st.columns(2)
 
     with col1:
 
-        x1 = st.number_input(
-            "X1",
+        box_x = st.number_input(
+            "X",
             min_value=0,
-            max_value=width,
+            max_value=max(0, width - 1),
             value=0,
             step=1
         )
 
-        y1 = st.number_input(
-            "Y1",
+        box_y = st.number_input(
+            "Y",
             min_value=0,
-            max_value=height,
+            max_value=max(0, height - 1),
             value=0,
             step=1
         )
 
     with col2:
 
-        x2 = st.number_input(
-            "X2",
-            min_value=0,
+        box_width = st.number_input(
+            "Lesion width",
+            min_value=1,
             max_value=width,
-            value=width,
+            value=min(100, width),
             step=1
         )
 
-        y2 = st.number_input(
-            "Y2",
-            min_value=0,
+        box_height = st.number_input(
+            "Lesion height",
+            min_value=1,
             max_value=height,
-            value=width,
+            value=min(100, height),
             step=1
         )
 
     lesion_box = [
-        x1,
-        y1,
-        x2 - x1,
-        y2 - y1
+        box_x,
+        box_y,
+        box_width,
+        box_height
     ]
 
     valid_box = (
-        x2 > x1
-        and y2 > y1
+        box_x + box_width <= width
+        and
+        box_y + box_height <= height
     )
 
     if not valid_box:
 
         st.warning(
-            "Please provide a valid lesion box."
+            "The lesion box extends outside "
+            "the image. Please adjust it."
         )
 
     else:
@@ -1115,53 +1071,53 @@ if uploaded_file is not None:
                     "Analyzing ultrasound..."
                 ):
 
-                    result, crop_image = predict(
+                    result, upload_crop = predict(
                         model,
                         image,
                         lesion_box
                     )
 
-                    prediction = result[
-                        "prediction"
-                    ]
+                    upload_prediction = (
+                        result["prediction"]
+                    )
 
-                    benign_probability = result[
-                        "benign_probability"
-                    ]
+                    upload_benign = (
+                        result["benign_probability"]
+                    )
 
-                    malignant_probability = result[
-                        "malignant_probability"
-                    ]
+                    upload_malignant = (
+                        result["malignant_probability"]
+                    )
 
-                    full_tensor = result[
-                        "full_tensor"
-                    ]
+                    upload_full_tensor = (
+                        result["full_tensor"]
+                    )
 
-                    crop_tensor = result[
-                        "crop_tensor"
-                    ]
+                    upload_crop_tensor = (
+                        result["crop_tensor"]
+                    )
 
-                    predicted_class = (
+                    upload_class = (
                         1
-                        if prediction == "Malignant"
+                        if upload_prediction == "Malignant"
                         else 0
                     )
 
-                    cam = generate_gradcam(
+                    upload_cam = generate_gradcam(
                         model,
-                        full_tensor,
-                        crop_tensor,
-                        predicted_class
+                        upload_full_tensor,
+                        upload_crop_tensor,
+                        upload_class
                     )
 
-                    gradcam_overlay = (
+                    upload_gradcam = (
                         create_gradcam_overlay(
                             image,
-                            cam
+                            upload_cam
                         )
                     )
 
-                    bbox_image = draw_bbox(
+                    upload_bbox = draw_bbox(
                         image,
                         lesion_box
                     )
@@ -1170,70 +1126,68 @@ if uploaded_file is not None:
                     "AI Prediction"
                 )
 
-                if prediction == "Malignant":
+                if upload_prediction == "Malignant":
 
                     st.error(
-                        f"Prediction: {prediction}"
+                        f"Prediction: "
+                        f"{upload_prediction}"
                     )
 
                 else:
 
                     st.success(
-                        f"Prediction: {prediction}"
+                        f"Prediction: "
+                        f"{upload_prediction}"
                     )
 
-                p1, p2 = st.columns(2)
+                u1, u2 = st.columns(2)
 
-                with p1:
+                with u1:
 
                     st.metric(
                         "Benign probability",
-                        f"{benign_probability * 100:.2f}%"
+                        f"{upload_benign * 100:.2f}%"
                     )
 
-                with p2:
+                with u2:
 
                     st.metric(
                         "Malignant probability",
-                        f"{malignant_probability * 100:.2f}%"
+                        f"{upload_malignant * 100:.2f}%"
                     )
 
                 st.subheader(
                     "Explainability"
                 )
 
-                e1, e2, e3 = st.columns(3)
+                e1, e2 = st.columns(2)
 
                 with e1:
 
                     st.image(
-                        bbox_image,
+                        upload_bbox,
                         caption="Lesion bounding box",
-                        use_container_width=True
+                        width=320
                     )
 
                 with e2:
 
                     st.image(
-                        gradcam_overlay,
+                        upload_gradcam,
                         caption="Grad-CAM attention",
-                        use_container_width=True
+                        width=320
                     )
 
-                with e3:
-
-                    st.image(
-                        crop_image,
-                        caption="Lesion-focused crop",
-                        use_container_width=True
-                    )
+                st.image(
+                    upload_crop,
+                    caption="Lesion-focused crop",
+                    width=280
+                )
 
                 st.info(
-                    "Ground-truth lesion masks are "
-                    "available for the BUS-BRA sample "
-                    "cases above. Uploaded images do "
-                    "not automatically have a ground-truth "
-                    "mask."
+                    "Ground-truth masks are shown for "
+                    "the BUS-BRA sample cases because "
+                    "their reference masks are available."
                 )
 
             except Exception as e:
@@ -1264,18 +1218,15 @@ with st.expander(
     )
 
     st.write(
-        "**Input size:** "
-        f"{IMAGE_SIZE} × {IMAGE_SIZE}"
+        f"**Input size:** {IMAGE_SIZE} × {IMAGE_SIZE}"
     )
 
     st.write(
-        "**Decision threshold:** "
-        f"{THRESHOLD}"
+        f"**Decision threshold:** {THRESHOLD}"
     )
 
     st.write(
-        "**Device:** "
-        f"{device}"
+        f"**Device:** {device}"
     )
 
     st.write(
@@ -1295,6 +1246,5 @@ st.divider()
 
 st.caption(
     "BUS-BRA Dual-View Breast Ultrasound AI "
-    "Research Prototype • "
-    "Not for clinical diagnosis"
+    "Research Prototype • Not for clinical diagnosis"
 )
