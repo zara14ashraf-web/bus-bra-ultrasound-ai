@@ -55,23 +55,30 @@ HF_CHECKPOINT_URL = (
 # LOAD CONFIGURATION
 # ============================================================
 
-with open(
-    CONFIG_PATH,
-    "r"
-) as f:
+MODEL_NAME = "SharedDualEfficientNetB3"
 
-    config = json.load(f)
+CLASSES = [
+    "Benign",
+    "Malignant"
+]
 
+IMAGE_SIZE = 300
 
-MODEL_NAME = config["model_name"]
-CLASSES = config["classes"]
+THRESHOLD = 0.52
 
-IMAGE_SIZE = config["input_size"]
-THRESHOLD = config["threshold"]
-CROP_MARGIN = config["crop_margin"]
+CROP_MARGIN = 0.25
 
-MEAN = config["normalization"]["mean"]
-STD = config["normalization"]["std"]
+MEAN = [
+    0.485,
+    0.456,
+    0.406
+]
+
+STD = [
+    0.229,
+    0.224,
+    0.225
+]
 
 
 # ============================================================
