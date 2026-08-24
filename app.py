@@ -443,134 +443,43 @@ def create_mask_overlay(
     return image
 
 
-# ============================================================
-# GRAD-CAM
-# ============================================================
+        # ----------------------------------------------------
+        # GRAD-CAM
+        # ----------------------------------------------------
 
-class GradCAM:
+        st.subheader(
+            "Grad-CAM Attention"
+        )
 
-    def __init__(
-        self,
-        model,
-        target_layer
-    ):
+        g1, g2 = st.columns(2)
 
-        self.model = model
+        with g1:
 
-        self.target_layer = target_layer
-
-        self.activations = None
-
-        self.gradients = None
-
-        self.forward_hook = (
-            target_layer.register_forward_hook(
-                self.save_activation
+            st.image(
+                gradcam_overlay,
+                caption="Grad-CAM — model attention",
+                width=320
             )
-        )
 
-        self.backward_hook = (
-            target_layer.register_full_backward_hook(
-                self.save_gradient
+        with g2:
+
+            st.image(
+                crop_image,
+                caption="Lesion-focused model input",
+                width=320
             )
+
+        st.caption(
+            "Grad-CAM highlights image regions "
+            "that contributed most strongly to "
+            "the selected model prediction."
         )
 
-    def save_activation(
-        self,
-        module,
-        inputs,
-        output
-    ):
+    
 
-        self.activations = output
-
-    def save_gradient(
-        self,
-        module,
-        grad_input,
-        grad_output
-    ):
-
-        self.gradients = grad_output[0]
-
-    def generate(
-        self,
-        full_tensor,
-        crop_tensor,
-        target_class
-    ):
-
-        self.model.zero_grad(
-            set_to_none=True
-        )
-
-        logits = self.model(
-            full_tensor,
-            crop_tensor
-        )
-
-        score = logits[
-            0,
-            target_class
-        ]
-
-        score.backward()
-
-        activations = (
-            self.activations
-        )
-
-        gradients = (
-            self.gradients
-        )
-
-        weights = gradients.mean(
-            dim=(2, 3),
-            keepdim=True
-        )
-
-        cam = (
-            weights * activations
-        ).sum(
-            dim=1,
-            keepdim=True
-        )
-
-        cam = F.relu(
-            cam
-        )
-
-        cam = F.interpolate(
-            cam,
-            size=(
-                IMAGE_SIZE,
-                IMAGE_SIZE
-            ),
-            mode="bilinear",
-            align_corners=False
-        )
-
-        cam = cam[
-            0,
-            0
-        ]
-
-        cam = cam.detach().cpu().numpy()
-
-        cam -= cam.min()
-
-        if cam.max() > 0:
-
-            cam /= cam.max()
-
-        return cam
-
-    def remove_hooks(self):
-
-        self.forward_hook.remove()
-
-        self.backward_hook.remove()
-
+      
+   
+      
 
 # ============================================================
 # GRAD-CAM OVERLAY
