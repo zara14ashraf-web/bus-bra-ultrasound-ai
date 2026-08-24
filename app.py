@@ -1,10 +1,14 @@
 ```python
 import os
 import json
+import requests
+
 import torch
 import streamlit as st
+
 from PIL import Image
 from torchvision import transforms
+
 from model import SharedDualEfficientNetB3
 
 
@@ -13,9 +17,9 @@ from model import SharedDualEfficientNetB3
 # ============================================================
 
 st.set_page_config(
-    page_title="BUS-BRA Ultrasound AI",
+    page_title="BUS-BRA Breast Ultrasound AI",
     page_icon="🩺",
-    layout="wide"
+    layout="centered"
 )
 
 
@@ -23,11 +27,8 @@ st.set_page_config(
 # PATHS
 # ============================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-CHECKPOINT_PATH = os.path.join(
-    BASE_DIR,
-    "best_dual_effnet_b3.pth"
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
 )
 
 CONFIG_PATH = os.path.join(
@@ -35,13 +36,37 @@ CONFIG_PATH = os.path.join(
     "deployment_config.json"
 )
 
+CHECKPOINT_PATH = os.path.join(
+    BASE_DIR,
+    "best_dual_effnet_b3.pth"
+)
+
+
+# ============================================================
+# HUGGING FACE CHECKPOINT
+# ============================================================
+
+HF_CHECKPOINT_URL = (
+    "https://huggingface.co/"
+    "zara14ashraf/busbra-dual-effnet-b3/"
+    "resolve/main/best_dual_effnet_b3.pth"
+)
+
 
 # ============================================================
 # LOAD CONFIGURATION
 # ============================================================
 
-with open(CONFIG_PATH, "r") as f:
+with open(
+    CONFIG_PATH,
+    "r"
+) as f:
+
     config = json.load(f)
+
+
+MODEL_NAME = config["model_name"]
+CLASSES = config["classes"]
 
 IMAGE_SIZE = config["input_size"]
 THRESHOLD = config["threshold"]
@@ -50,47 +75,96 @@ CROP_MARGIN = config["crop_margin"]
 MEAN = config["normalization"]["mean"]
 STD = config["normalization"]["std"]
 
-CLASSES = config["classes"]
-
 
 # ============================================================
 # DEVICE
 # ============================================================
 
-DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available() else "cpu"
+device = torch.device(
+    "cuda"
+    if torch.cuda.is_available()
+    else "cpu"
 )
 
 
 # ============================================================
-# MODEL LOADING
+# DOWNLOAD CHECKPOINT
+# ============================================================
+
+def download_checkpoint():
+
+    if os.path.exists(
+        CHECKPOINT_PATH
+    ):
+        return
+
+    with st.spinner(
+        "Downloading trained AI model..."
+    ):
+
+        response = requests.get(
+            HF_CHECKPOINT_URL,
+            stream=True,
+            timeout=300
+        )
+
+        response.raise_for_status()
+
+        with open(
+            CHECKPOINT_PATH,
+            "wb"
+        ) as f:
+
+            for chunk in response.iter_content(
+                chunk_size=1024 * 1024
+            ):
+
+                if chunk:
+                    f.write(chunk)
+
+
+# ============================================================
+# LOAD MODEL
 # ============================================================
 
 @st.cache_resource
 def load_model():
 
+    download_checkpoint()
+
     model = SharedDualEfficientNetB3(
-        num_classes=len(CLASSES)
+        num_classes=2
     )
 
     checkpoint = torch.load(
         CHECKPOINT_PATH,
-        map_location=DEVICE,
+        map_location=device,
         weights_only=False
     )
 
-    if isinstance(checkpoint, dict):
+    if isinstance(
+        checkpoint,
+        dict
+    ):
 
         if "state_dict" in checkpoint:
-            state_dict = checkpoint["state_dict"]
+
+            state_dict = checkpoint[
+                "state_dict"
+            ]
 
         elif "model_state_dict" in checkpoint:
-            state_dict = checkpoint["model_state_dict"]
+
+            state_dict = checkpoint[
+                "model_state_dict"
+            ]
 
         else:
+
             state_dict = checkpoint
 
     else:
+
         state_dict = checkpoint
 
     model.load_state_dict(
@@ -98,21 +172,29 @@ def load_model():
         strict=True
     )
 
-    model = model.to(DEVICE)
+    model = model.to(
+        device
+    )
+
     model.eval()
 
     return model
 
 
 # ============================================================
-# IMAGE TRANSFORM
+# IMAGE TRANSFORMATION
 # ============================================================
 
 transform = transforms.Compose([
     transforms.Resize(
-        (IMAGE_SIZE, IMAGE_SIZE)
+        (
+            IMAGE_SIZE,
+            IMAGE_SIZE
+        )
     ),
+
     transforms.ToTensor(),
+
     transforms.Normalize(
         mean=MEAN,
         std=STD
@@ -131,25 +213,50 @@ def make_lesion_crop(
 ):
 
     x1, y1, x2, y2 = [
-        int(v) for v in box
+        int(v)
+        for v in box
     ]
 
     width, height = image.size
 
-    box_w = x2 - x1
-    box_h = y2 - y1
+    box_width = x2 - x1
+    box_height = y2 - y1
 
-    pad_x = int(box_w * margin)
-    pad_y = int(box_h * margin)
+    pad_x = int(
+        box_width * margin
+    )
 
-    x1 = max(0, x1 - pad_x)
-    y1 = max(0, y1 - pad_y)
+    pad_y = int(
+        box_height * margin
+    )
 
-    x2 = min(width, x2 + pad_x)
-    y2 = min(height, y2 + pad_y)
+    x1 = max(
+        0,
+        x1 - pad_x
+    )
+
+    y1 = max(
+        0,
+        y1 - pad_y
+    )
+
+    x2 = min(
+        width,
+        x2 + pad_x
+    )
+
+    y2 = min(
+        height,
+        y2 + pad_y
+    )
 
     return image.crop(
-        (x1, y1, x2, y2)
+        (
+            x1,
+            y1,
+            x2,
+            y2
+        )
     )
 
 
@@ -177,8 +284,13 @@ def predict(
         crop_image
     ).unsqueeze(0)
 
-    full_tensor = full_tensor.to(DEVICE)
-    crop_tensor = crop_tensor.to(DEVICE)
+    full_tensor = full_tensor.to(
+        device
+    )
+
+    crop_tensor = crop_tensor.to(
+        device
+    )
 
     with torch.no_grad():
 
@@ -200,88 +312,47 @@ def predict(
         probabilities[1].item()
     )
 
-    prediction = (
-        "Malignant"
-        if malignant_probability >= THRESHOLD
-        else "Benign"
-    )
+    if malignant_probability >= THRESHOLD:
 
-    confidence = (
-        malignant_probability
-        if prediction == "Malignant"
-        else benign_probability
-    )
+        prediction = "Malignant"
+
+    else:
+
+        prediction = "Benign"
 
     return {
         "prediction": prediction,
-        "confidence": confidence,
-        "benign_probability": benign_probability,
-        "malignant_probability": malignant_probability,
-        "crop_image": crop_image
-    }
+        "benign_probability":
+            benign_probability,
+        "malignant_probability":
+            malignant_probability,
+        "threshold": THRESHOLD
+    }, crop_image
 
 
 # ============================================================
 # HEADER
 # ============================================================
 
-st.title("🩺 BUS-BRA Ultrasound AI")
-
-st.markdown(
-    """
-### Dual-View Breast Ultrasound Classification
-
-An AI-assisted research prototype using a **dual-view
-EfficientNet-B3 architecture** that analyzes both the complete
-ultrasound image and a lesion-focused region.
-"""
+st.title(
+    "🩺 BUS-BRA Breast Ultrasound AI"
 )
 
-st.divider()
+st.write(
+    "Dual-view EfficientNet-B3 model "
+    "for benign vs malignant breast "
+    "ultrasound classification."
+)
+
+
+st.info(
+    "Research prototype — this tool is "
+    "not a clinical diagnostic system."
+)
 
 
 # ============================================================
-# SIDEBAR
-# ============================================================
-
-with st.sidebar:
-
-    st.header("About the Model")
-
-    st.write(
-        "The model uses two EfficientNet-B3 branches:"
-    )
-
-    st.write(
-        "• Full ultrasound image"
-    )
-
-    st.write(
-        "• Lesion-focused crop"
-    )
-
-    st.write(
-        "Their feature representations are combined "
-        "for binary classification."
-    )
-
-    st.divider()
-
-    st.caption(
-        f"Input size: {IMAGE_SIZE} × {IMAGE_SIZE}"
-    )
-
-    st.caption(
-        f"Decision threshold: {THRESHOLD:.2f}"
-    )
-
-    st.caption(
-        "Research prototype — not a clinical diagnostic tool."
-    )
-
-
-# ============================================================
-# MODEL
+# LOAD MODEL
 # ============================================================
 
 try:
@@ -303,18 +374,23 @@ except Exception as e:
 # IMAGE UPLOAD
 # ============================================================
 
+st.subheader(
+    "1. Upload Ultrasound Image"
+)
+
 uploaded_file = st.file_uploader(
-    "Upload a breast ultrasound image",
+    "Choose a breast ultrasound image",
     type=[
         "png",
         "jpg",
-        "jpeg",
-        "bmp",
-        "tif",
-        "tiff"
+        "jpeg"
     ]
 )
 
+
+# ============================================================
+# IMAGE PROCESSING
+# ============================================================
 
 if uploaded_file is not None:
 
@@ -322,35 +398,37 @@ if uploaded_file is not None:
         uploaded_file
     ).convert("RGB")
 
-    st.subheader("1. Ultrasound Image")
-
     st.image(
         image,
         caption="Uploaded ultrasound",
         use_container_width=True
     )
 
-    st.divider()
+    width, height = image.size
 
-    # --------------------------------------------------------
-    # LESION COORDINATES
-    # --------------------------------------------------------
-
-    st.subheader("2. Define Lesion Region")
-
-    st.info(
-        "Enter the lesion bounding-box coordinates. "
-        "The coordinates correspond to the original image."
+    st.caption(
+        f"Image size: {width} × {height} pixels"
     )
 
-    width, height = image.size
+    # --------------------------------------------------------
+    # LESION BOX
+    # --------------------------------------------------------
+
+    st.subheader(
+        "2. Define Lesion Region"
+    )
+
+    st.write(
+        "Enter the lesion bounding-box "
+        "coordinates in the original image."
+    )
 
     col1, col2 = st.columns(2)
 
     with col1:
 
         x1 = st.number_input(
-            "Left (x1)",
+            "X1",
             min_value=0,
             max_value=width,
             value=0,
@@ -358,7 +436,7 @@ if uploaded_file is not None:
         )
 
         y1 = st.number_input(
-            "Top (y1)",
+            "Y1",
             min_value=0,
             max_value=height,
             value=0,
@@ -368,7 +446,7 @@ if uploaded_file is not None:
     with col2:
 
         x2 = st.number_input(
-            "Right (x2)",
+            "X2",
             min_value=0,
             max_value=width,
             value=width,
@@ -376,7 +454,7 @@ if uploaded_file is not None:
         )
 
         y2 = st.number_input(
-            "Bottom (y2)",
+            "Y2",
             min_value=0,
             max_value=height,
             value=height,
@@ -390,47 +468,29 @@ if uploaded_file is not None:
         y2
     ]
 
+    # --------------------------------------------------------
+    # VALIDATE BOX
+    # --------------------------------------------------------
+
     valid_box = (
         x2 > x1
         and y2 > y1
     )
 
-    if valid_box:
+    if not valid_box:
 
-        crop_preview = make_lesion_crop(
-            image,
-            lesion_box,
-            CROP_MARGIN
+        st.warning(
+            "Please provide a valid lesion box."
         )
 
-        st.subheader("Lesion-Focused View")
+    # --------------------------------------------------------
+    # PREDICT
+    # --------------------------------------------------------
 
-        preview_col1, preview_col2 = st.columns(2)
-
-        with preview_col1:
-
-            st.image(
-                image,
-                caption="Full ultrasound",
-                use_container_width=True
-            )
-
-        with preview_col2:
-
-            st.image(
-                crop_preview,
-                caption="Lesion-focused crop",
-                use_container_width=True
-            )
-
-        st.divider()
-
-        # ----------------------------------------------------
-        # RUN INFERENCE
-        # ----------------------------------------------------
+    if valid_box:
 
         if st.button(
-            "🔬 Analyze Ultrasound",
+            "🔍 Analyze Ultrasound",
             type="primary",
             use_container_width=True
         ):
@@ -439,133 +499,119 @@ if uploaded_file is not None:
                 "Analyzing ultrasound..."
             ):
 
-                result = predict(
-                    model,
-                    image,
-                    lesion_box
-                )
+                try:
 
-            st.subheader(
-                "3. AI Assessment"
-            )
+                    result, crop_image = predict(
+                        model,
+                        image,
+                        lesion_box
+                    )
 
-            prediction = result[
-                "prediction"
-            ]
+                    prediction = result[
+                        "prediction"
+                    ]
 
-            confidence = result[
-                "confidence"
-            ]
+                    benign_probability = result[
+                        "benign_probability"
+                    ]
 
-            benign_probability = result[
-                "benign_probability"
-            ]
+                    malignant_probability = result[
+                        "malignant_probability"
+                    ]
 
-            malignant_probability = result[
-                "malignant_probability"
-            ]
+                    # ----------------------------------------
+                    # RESULTS
+                    # ----------------------------------------
 
-            # ------------------------------------------------
-            # RESULT
-            # ------------------------------------------------
+                    st.subheader(
+                        "3. AI Prediction"
+                    )
 
-            if prediction == "Malignant":
+                    if prediction == "Malignant":
 
-                st.error(
-                    f"Prediction: {prediction}"
-                )
+                        st.error(
+                            f"Prediction: {prediction}"
+                        )
 
-            else:
+                    else:
 
-                st.success(
-                    f"Prediction: {prediction}"
-                )
+                        st.success(
+                            f"Prediction: {prediction}"
+                        )
 
-            st.metric(
-                "Model confidence",
-                f"{confidence * 100:.2f}%"
-            )
+                    # ----------------------------------------
+                    # PROBABILITIES
+                    # ----------------------------------------
 
-            st.divider()
+                    col1, col2 = st.columns(2)
 
-            # ------------------------------------------------
-            # PROBABILITIES
-            # ------------------------------------------------
+                    with col1:
 
-            st.subheader(
-                "Class Probabilities"
-            )
+                        st.metric(
+                            "Benign probability",
+                            f"{benign_probability * 100:.2f}%"
+                        )
 
-            prob_col1, prob_col2 = st.columns(2)
+                    with col2:
 
-            with prob_col1:
+                        st.metric(
+                            "Malignant probability",
+                            f"{malignant_probability * 100:.2f}%"
+                        )
 
-                st.metric(
-                    "Benign",
-                    f"{benign_probability * 100:.2f}%"
-                )
+                    # ----------------------------------------
+                    # LESION CROP
+                    # ----------------------------------------
 
-            with prob_col2:
+                    st.subheader(
+                        "Lesion-Focused View"
+                    )
 
-                st.metric(
-                    "Malignant",
-                    f"{malignant_probability * 100:.2f}%"
-                )
+                    st.image(
+                        crop_image,
+                        caption="Lesion-focused crop",
+                        use_container_width=True
+                    )
 
-            st.progress(
-                benign_probability
-            )
+                    # ----------------------------------------
+                    # MODEL INFORMATION
+                    # ----------------------------------------
 
-            st.caption(
-                "Benign probability"
-            )
+                    with st.expander(
+                        "Model information"
+                    ):
 
-            st.progress(
-                malignant_probability
-            )
+                        st.write(
+                            f"**Model:** {MODEL_NAME}"
+                        )
 
-            st.caption(
-                "Malignant probability"
-            )
+                        st.write(
+                            "**Architecture:** "
+                            "Dual EfficientNet-B3"
+                        )
 
-            st.divider()
+                        st.write(
+                            "**Input size:** "
+                            f"{IMAGE_SIZE} × {IMAGE_SIZE}"
+                        )
 
-            # ------------------------------------------------
-            # MODEL DETAILS
-            # ------------------------------------------------
+                        st.write(
+                            "**Decision threshold:** "
+                            f"{THRESHOLD}"
+                        )
 
-            st.subheader(
-                "Model Interpretation"
-            )
+                        st.write(
+                            "**Device:** "
+                            f"{device}"
+                        )
 
-            st.write(
-                """
-The prediction is generated from two complementary views:
-the complete ultrasound image and the lesion-focused crop.
-Both views are processed independently by EfficientNet-B3
-feature extractors, after which their learned representations
-are combined by the classification head.
-"""
-            )
+                except Exception as e:
 
-            st.warning(
-                "This system is a research prototype and should "
-                "not be used as a substitute for professional "
-                "radiological assessment or clinical diagnosis."
-            )
+                    st.error(
+                        "Prediction failed."
+                    )
 
-    else:
-
-        st.warning(
-            "Please provide a valid lesion region where "
-            "x2 > x1 and y2 > y1."
-        )
-
-else:
-
-    st.info(
-        "Upload a breast ultrasound image to begin."
-    )
+                    st.exception(e)
 
 
 # ============================================================
@@ -575,6 +621,7 @@ else:
 st.divider()
 
 st.caption(
-    "BUS-BRA Ultrasound AI • Research Prototype"
+    "BUS-BRA Dual-View Breast Ultrasound AI "
+    "Research Prototype"
 )
 ```
