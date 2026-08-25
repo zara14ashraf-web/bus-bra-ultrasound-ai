@@ -1568,8 +1568,7 @@ if mode == "Upload Ultrasound":
     # DISCLAIMER
     # --------------------------------------------------------
 
-    st.write("")
-
+    
     st.info(
         """
         **Research & Educational Prototype**
