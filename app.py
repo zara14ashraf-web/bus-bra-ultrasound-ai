@@ -952,25 +952,42 @@ with st.sidebar:
 # ============================================================
 
 st.markdown(
-    '<div class="hero-title">'
-    'AI-Assisted Breast Ultrasound Analysis'
-    '</div>',
-    unsafe_allow_html=True,
-)
+    """
+    <div style="text-align:center; padding: 1rem 0 0.5rem 0;">
 
-st.markdown(
-    '<div class="hero-subtitle">'
-    'Deep Learning for Benign and Malignant Lesion Classification'
-    '</div>',
-    unsafe_allow_html=True,
-)
+        <div style="
+            font-size: 2.45rem;
+            font-weight: 750;
+            color: #173f4d;
+            line-height: 1.2;
+            margin-bottom: 0.45rem;
+        ">
+            AI-Assisted Breast Ultrasound Analysis
+        </div>
 
-st.markdown(
-    '<div class="hero-description">'
-    'A research prototype exploring dual-view deep learning '
-    'for breast ultrasound analysis, with probability-based '
-    'classification and Grad-CAM visual explainability.'
-    '</div>',
+        <div style="
+            font-size: 1.05rem;
+            color: #607984;
+            margin-bottom: 0.65rem;
+        ">
+            Deep Learning for Breast Lesion Classification
+        </div>
+
+        <div style="
+            max-width: 760px;
+            margin: auto;
+            color: #71838b;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        ">
+            A research prototype exploring dual-view deep learning
+            for benign and malignant breast ultrasound classification,
+            with probability-based predictions and Grad-CAM
+            visual explainability.
+        </div>
+
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -981,91 +998,100 @@ st.write("")
 # DISCLAIMER
 # ============================================================
 
-with st.container(border=True):
+st.info(
+    """
+    **Research & Educational Prototype**
 
-    st.markdown(
-        "**Research & Educational Prototype**"
+    This application is developed for research and educational
+    demonstration only. It is not a medical device and should
+    not be used to diagnose, exclude, or guide treatment of
+    breast disease. AI predictions should not replace assessment
+    by a qualified healthcare professional.
+    """
+)
+
+
+# ============================================================
+# MODEL OVERVIEW
+# ============================================================
+
+with st.expander(
+    "🧠 Model Overview",
+    expanded=False,
+):
+
+    st.write(
+        "The model uses a dual-view deep learning architecture "
+        "designed to examine both the overall ultrasound image "
+        "and a lesion-focused representation."
+    )
+
+    st.write("")
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+
+        st.metric(
+            "Architecture",
+            "Dual EfficientNet-B3",
+        )
+
+    with c2:
+
+        st.metric(
+            "Task",
+            "Benign vs Malignant",
+        )
+
+    with c3:
+
+        st.metric(
+            "Input",
+            "300 × 300",
+        )
+
+    with c4:
+
+        st.metric(
+            "Explainability",
+            "Grad-CAM",
+        )
+
+
+# ============================================================
+# WHY WAS THIS DEVELOPED?
+# ============================================================
+
+with st.expander(
+    "🔬 Why was this developed?",
+    expanded=False,
+):
+
+    st.write(
+        "As a Medical Imaging Technologist, I developed this "
+        "project to explore how artificial intelligence can "
+        "complement medical imaging workflows and support "
+        "research in breast ultrasound analysis."
     )
 
     st.write(
-        "This application is developed for research and "
-        "educational demonstration. It is not a medical device "
-        "and should not be used to diagnose, exclude, or guide "
-        "treatment of breast disease. AI predictions should not "
-        "replace assessment by a qualified healthcare professional."
+        "Breast ultrasound images can demonstrate considerable "
+        "variation in lesion appearance. This project investigates "
+        "whether a dual-view deep learning approach can learn from "
+        "both the overall ultrasound image and a focused lesion view."
+    )
+
+    st.write(
+        "The aim is not to replace radiologists or medical imaging "
+        "professionals. Instead, the system explores AI as an "
+        "assistive research tool that can provide an additional "
+        "image-based perspective together with visual explanation "
+        "through Grad-CAM."
     )
 
 
-# ============================================================
-# MODEL INFORMATION
-# ============================================================
 
-st.subheader("Model Overview")
-
-st.caption(
-    "The system uses a dual-view architecture to examine "
-    "both global ultrasound appearance and a lesion-focused view."
-)
-
-info1, info2, info3, info4 = st.columns(4)
-
-with info1:
-
-    st.metric(
-        "Architecture",
-        "Dual EfficientNet-B3",
-    )
-
-with info2:
-
-    st.metric(
-        "Classification",
-        "Benign / Malignant",
-    )
-
-with info3:
-
-    st.metric(
-        "Input Resolution",
-        "300 × 300",
-    )
-
-with info4:
-
-    st.metric(
-        "Explainability",
-        "Grad-CAM",
-    )
-
-
-# ============================================================
-# WHY DEVELOPED
-# ============================================================
-
-st.subheader(
-    "Why was this project developed?"
-)
-
-st.write(
-    "As a Medical Imaging Technologist, I developed this "
-    "project to explore how artificial intelligence can "
-    "complement medical imaging workflows and contribute "
-    "towards more transparent image analysis."
-)
-
-st.write(
-    "Breast ultrasound can demonstrate substantial variation "
-    "in lesion appearance. This project investigates whether "
-    "a dual-view deep learning model can learn from both the "
-    "overall ultrasound image and a focused lesion representation."
-)
-
-st.write(
-    "The purpose is not to replace radiologists or medical "
-    "imaging professionals. Instead, the project explores AI "
-    "as an assistive research tool that can provide an additional "
-    "image-based perspective together with visual explanation."
-)
 
 
 # ============================================================
