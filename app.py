@@ -699,7 +699,7 @@ def predict(
         crop_tensor,
     )
 # ============================================================
-# CONFIDENCE-AWARE AI ASSESSMENT
+# AI ASSESSMENT
 # ============================================================
 
 def display_ai_assessment(
@@ -707,19 +707,70 @@ def display_ai_assessment(
     benign_probability,
     malignant_probability,
 ):
+    """
+    Present model output using probability separation rather
+    than calling the raw class probability "accuracy".
+    """
 
-    model_support = max(
+    # --------------------------------------------------------
+    # PROBABILITY SEPARATION
+    # --------------------------------------------------------
+
+    probabilities = [
         benign_probability,
         malignant_probability,
-    )
+    ]
 
-    probability_gap = abs(
-        benign_probability
-        - malignant_probability
+    highest_probability = max(probabilities)
+    lowest_probability = min(probabilities)
+
+    separation = (
+        highest_probability
+        - lowest_probability
     )
 
     # --------------------------------------------------------
-    # MODEL PREDICTION
+    # INTERPRETATION
+    # --------------------------------------------------------
+
+    if separation >= 0.40:
+
+        interpretation = "Strong model preference"
+
+        interpretation_message = (
+            "The model shows a clear probability separation "
+            "between the two classes for this image."
+        )
+
+        interpretation_type = "success"
+
+    elif separation >= 0.20:
+
+        interpretation = "Moderate model preference"
+
+        interpretation_message = (
+            "The model shows a moderate preference for the "
+            "predicted class, but the alternative class remains "
+            "meaningful."
+        )
+
+        interpretation_type = "warning"
+
+    else:
+
+        interpretation = "Low model separation"
+
+        interpretation_message = (
+            "The model outputs similar probabilities for both "
+            "classes. This case should therefore be interpreted "
+            "as an uncertain model output rather than a strong "
+            "classification."
+        )
+
+        interpretation_type = "warning"
+
+    # --------------------------------------------------------
+    # PREDICTION
     # --------------------------------------------------------
 
     if prediction == "Benign":
@@ -734,131 +785,77 @@ def display_ai_assessment(
             "### Model Prediction: MALIGNANT"
         )
 
-    st.write("")
-
     # --------------------------------------------------------
-    # MODEL SUPPORT
+    # MODEL INTERPRETATION
     # --------------------------------------------------------
 
-    support_col1, support_col2 = st.columns(
-        [1, 2],
-        gap="medium",
-    )
+    if interpretation_type == "success":
 
-    with support_col1:
-
-        st.metric(
-            "Model Support",
-            f"{model_support * 100:.1f}%",
-        )
-
-    with support_col2:
-
-        if probability_gap < 0.10:
-
-            st.warning(
-                "**Close probability distribution**"
-            )
-
-        elif probability_gap < 0.20:
-
-            st.info(
-                "**Moderate probability separation**"
-            )
-
-        else:
-
-            st.success(
-                "**Clear probability separation**"
-            )
-
-    # --------------------------------------------------------
-    # INTERPRETATION
-    # --------------------------------------------------------
-
-    if probability_gap < 0.10:
-
-        st.caption(
-            "The model favors the predicted class, but the "
-            "two class probabilities are relatively close. "
-            "This indicates limited separation between the "
-            "two classes for this image."
-        )
-
-    elif probability_gap < 0.20:
-
-        st.caption(
-            "The model shows a moderate preference for the "
-            "predicted class, while some overlap remains "
-            "between the two class probabilities."
+        st.success(
+            f"**{interpretation}**"
         )
 
     else:
 
-        st.caption(
-            "The model shows clearer probability separation "
-            "between the predicted class and the alternative class."
+        st.warning(
+            f"**{interpretation}**"
         )
+
+    st.caption(
+        interpretation_message
+    )
 
     st.write("")
 
     # --------------------------------------------------------
-    # PROBABILITY DETAILS
+    # PROBABILITY DISTRIBUTION
     # --------------------------------------------------------
 
-    with st.expander(
-        "Probability Details",
-        expanded=False,
-    ):
+    st.markdown(
+        "**Model Output Distribution**"
+    )
 
-        prob1, prob2 = st.columns(
-            2,
-            gap="large",
+    prob1, prob2 = st.columns(
+        2,
+        gap="large",
+    )
+
+    with prob1:
+
+        st.metric(
+            "Benign",
+            f"{benign_probability * 100:.1f}%",
         )
 
-        with prob1:
-
-            st.metric(
-                "Benign",
-                f"{benign_probability * 100:.1f}%",
-            )
-
-            st.progress(
-                benign_probability
-            )
-
-        with prob2:
-
-            st.metric(
-                "Malignant",
-                f"{malignant_probability * 100:.1f}%",
-            )
-
-            st.progress(
-                malignant_probability
-            )
-
-    # --------------------------------------------------------
-    # UNCERTAINTY NOTE
-    # --------------------------------------------------------
-
-    if probability_gap < 0.10:
-
-        st.info(
-            """
-            **Interpretation Note**
-
-            The predicted class represents the class with the
-            higher model probability. When the probabilities are
-            close, the model has limited separation between the
-            two classes and the result should therefore be
-            interpreted cautiously.
-
-            The probability distribution shown above is the
-            model's actual output and has not been artificially
-            increased to create a stronger-looking prediction.
-            """
+        st.progress(
+            benign_probability
         )
+
+    with prob2:
+
+        st.metric(
+            "Malignant",
+            f"{malignant_probability * 100:.1f}%",
+        )
+
+        st.progress(
+            malignant_probability
+        )
+
+    # --------------------------------------------------------
+    # IMPORTANT INTERPRETATION NOTE
+    # --------------------------------------------------------
+
+    st.caption(
+        "These percentages represent the model's output "
+        "distribution for this image. They do not represent "
+        "diagnostic accuracy, disease probability, or clinical "
+        "certainty."
+    )
+
+    st.caption(
+        f"Probability separation: {separation * 100:.1f} percentage points"
+    )
 
 # ============================================================
 # BBOX FROM CAM
