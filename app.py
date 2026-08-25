@@ -17,7 +17,7 @@ from model import SharedDualEfficientNetB3
 # ============================================================
 
 st.set_page_config(
-    page_title="SonoInsight AI",
+    page_title="AI-Assisted Breast Ultrasound Analysis",
     page_icon="🩺",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -25,230 +25,456 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM STYLING
+# CUSTOM CSS
 # ============================================================
 
 st.markdown(
     """
     <style>
 
-    /* =========================
-       MAIN PAGE
-       ========================= */
+    /* ========================================================
+       GLOBAL
+       ======================================================== */
+
+    .stApp {
+        background: #ffffff;
+    }
 
     .block-container {
         max-width: 1180px;
-        padding-top: 1.5rem;
+        padding-top: 1.2rem;
         padding-bottom: 3rem;
     }
 
-    /* =========================
+    h1, h2, h3, h4 {
+        color: #163f4d;
+    }
+
+    /* ========================================================
        HERO
-       ========================= */
+       ======================================================== */
 
     .hero {
         text-align: center;
-        padding: 1.5rem 1rem 1.2rem 1rem;
+        padding: 1.8rem 1rem 1.2rem 1rem;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        padding: 5px 13px;
+        border: 1px solid #d7e5e9;
+        border-radius: 999px;
+        background: #f5fafb;
+        color: #397080;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.35px;
+        margin-bottom: 0.8rem;
     }
 
     .hero-title {
-        font-size: 2.7rem;
-        font-weight: 700;
-        color: #123b4a;
-        letter-spacing: -1px;
+        font-size: 2.55rem;
+        line-height: 1.15;
+        font-weight: 750;
+        color: #123d4b;
+        letter-spacing: -1.2px;
+        margin-bottom: 0.45rem;
     }
 
     .hero-subtitle {
-        font-size: 1.15rem;
-        color: #55717c;
-        margin-top: 0.2rem;
+        font-size: 1.08rem;
+        color: #58727b;
+        margin-bottom: 0.75rem;
     }
 
     .hero-description {
         max-width: 760px;
-        margin: 0.8rem auto 0 auto;
-        color: #64748b;
-        font-size: 0.95rem;
-        line-height: 1.6;
+        margin: auto;
+        color: #687b83;
+        font-size: 0.91rem;
+        line-height: 1.65;
     }
 
-    /* =========================
+    /* ========================================================
        DISCLAIMER
-       ========================= */
+       ======================================================== */
 
     .disclaimer {
-        background-color: #f8fafc;
-        border: 1px solid #dbe4ea;
-        border-radius: 12px;
-        padding: 14px 18px;
-        margin: 0.5rem 0 1.7rem 0;
-        color: #475569;
-        font-size: 0.85rem;
+        background: #f8fafc;
+        border: 1px solid #dbe5ea;
+        border-left: 4px solid #5c8995;
+        border-radius: 10px;
+        padding: 13px 17px;
+        margin: 0.8rem 0 1.8rem 0;
+        color: #52636b;
+        font-size: 0.82rem;
         line-height: 1.55;
     }
 
-    .disclaimer strong {
+    .disclaimer-title {
         color: #183f4d;
+        font-weight: 700;
+        margin-bottom: 3px;
     }
 
-    /* =========================
-       SECTION HEADINGS
-       ========================= */
+    /* ========================================================
+       SECTION
+       ======================================================== */
+
+    .section-header {
+        margin-top: 1.8rem;
+        margin-bottom: 0.85rem;
+    }
 
     .section-title {
-        font-size: 1.5rem;
-        font-weight: 650;
         color: #183f4d;
-        margin-top: 1.4rem;
-        margin-bottom: 0.2rem;
+        font-size: 1.38rem;
+        font-weight: 720;
+        margin-bottom: 0.18rem;
     }
 
     .section-subtitle {
-        color: #71808a;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
+        color: #74838a;
+        font-size: 0.84rem;
+        line-height: 1.5;
     }
 
-    /* =========================
-       MODEL INFO CARDS
-       ========================= */
+    /* ========================================================
+       MODEL CARDS
+       ======================================================== */
 
-    .info-card {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 15px 17px;
-        min-height: 88px;
+    .model-card {
+        background: #f8fafb;
+        border: 1px solid #e0e8eb;
+        border-radius: 11px;
+        padding: 15px 16px;
+        min-height: 92px;
     }
 
-    .info-label {
-        font-size: 0.72rem;
-        color: #71808a;
+    .model-label {
+        color: #7b8b92;
+        font-size: 0.68rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.65px;
         margin-bottom: 5px;
     }
 
-    .info-value {
-        font-size: 0.98rem;
-        font-weight: 650;
+    .model-value {
         color: #183f4d;
+        font-size: 0.92rem;
+        font-weight: 680;
+        line-height: 1.3;
     }
 
-    /* =========================
+    /* ========================================================
        WHY SECTION
-       ========================= */
+       ======================================================== */
 
     .why-box {
-        background-color: #f8fafc;
-        border-left: 4px solid #2f7181;
-        border-radius: 10px;
-        padding: 17px 20px;
-        color: #475569;
-        line-height: 1.65;
-        font-size: 0.9rem;
+        background: #f8fafb;
+        border: 1px solid #e0e8eb;
+        border-radius: 12px;
+        padding: 19px 21px;
+        color: #53656d;
+        font-size: 0.88rem;
+        line-height: 1.72;
+    }
+
+    .why-highlight {
+        color: #214f5d;
+        font-weight: 650;
+    }
+
+    /* ========================================================
+       WORKSPACE
+       ======================================================== */
+
+    .workspace {
+        background: #f9fbfc;
+        border: 1px solid #dfe8eb;
+        border-radius: 14px;
+        padding: 20px;
+        margin-top: 0.8rem;
+    }
+
+    .workspace-title {
+        color: #183f4d;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 3px;
+    }
+
+    .workspace-text {
+        color: #75848a;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+
+    /* ========================================================
+       RESULT
+       ======================================================== */
+
+    .prediction-panel {
+        background: #ffffff;
+        border: 1px solid #dfe8eb;
+        border-radius: 13px;
+        padding: 19px 20px;
         margin-top: 0.7rem;
     }
 
-    /* =========================
-       RESULT
-       ========================= */
-
-    .result-card {
-        background-color: #f8fafc;
-        border: 1px solid #dbe4ea;
-        border-radius: 14px;
-        padding: 20px;
-        text-align: center;
-        margin: 0.8rem 0 1rem 0;
-    }
-
-    .result-label {
-        color: #71808a;
-        font-size: 0.75rem;
+    .prediction-label {
+        color: #7b898f;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
+        letter-spacing: 0.7px;
+        font-size: 0.67rem;
+        font-weight: 650;
     }
 
-    .result-value {
+    .prediction-value {
         font-size: 2rem;
-        font-weight: 750;
+        line-height: 1.2;
+        font-weight: 760;
+        margin-top: 5px;
+    }
+
+    .prediction-note {
+        color: #7b898f;
+        font-size: 0.75rem;
         margin-top: 4px;
     }
 
-    /* =========================
+    /* ========================================================
        PROBABILITY
-       ========================= */
+       ======================================================== */
 
-    .probability-card {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 14px 17px;
+    .prob-card {
+        background: #ffffff;
+        border: 1px solid #dfe8eb;
+        border-radius: 11px;
+        padding: 14px 16px;
+        margin-bottom: 0.65rem;
     }
 
-    .probability-name {
-        font-size: 0.84rem;
-        color: #475569;
+    .prob-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 7px;
+    }
+
+    .prob-name {
+        color: #52656d;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .prob-value {
+        color: #183f4d;
+        font-size: 0.86rem;
+        font-weight: 720;
+    }
+
+    .prob-track {
+        width: 100%;
+        height: 7px;
+        background: #e8eef0;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .prob-fill {
+        height: 100%;
+        border-radius: 20px;
+    }
+
+    .benign-fill {
+        background: #4d9277;
+    }
+
+    .malignant-fill {
+        background: #b75c5c;
+    }
+
+    /* ========================================================
+       VISUAL EXPLANATION
+       ======================================================== */
+
+    .explain-card {
+        background: #f9fbfc;
+        border: 1px solid #dfe8eb;
+        border-radius: 12px;
+        padding: 14px;
+        min-height: 70px;
+    }
+
+    .explain-title {
+        color: #183f4d;
+        font-size: 0.86rem;
+        font-weight: 700;
         margin-bottom: 4px;
     }
 
-    .probability-value {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #183f4d;
+    .explain-text {
+        color: #74838a;
+        font-size: 0.76rem;
+        line-height: 1.45;
     }
 
-    /* =========================
-       SAMPLE
-       ========================= */
+    /* ========================================================
+       SAMPLE CASE
+       ======================================================== */
 
-    .sample-title {
-        font-size: 0.88rem;
+    .sample-card {
+        background: #ffffff;
+        border: 1px solid #dfe8eb;
+        border-radius: 12px;
+        padding: 10px;
+    }
+
+    .sample-name {
+        color: #183f4d;
+        font-size: 0.82rem;
+        font-weight: 680;
+        margin-top: 6px;
+    }
+
+    .sample-id {
+        color: #849198;
+        font-size: 0.69rem;
+        margin-top: 2px;
+    }
+
+    /* ========================================================
+       CASE META
+       ======================================================== */
+
+    .case-meta {
+        background: #f8fafb;
+        border: 1px solid #e0e8eb;
+        border-radius: 10px;
+        padding: 12px 14px;
+    }
+
+    .case-meta-label {
+        color: #7c8a91;
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .case-meta-value {
+        color: #183f4d;
+        font-size: 0.84rem;
         font-weight: 650;
-        color: #183f4d;
-        margin-top: 0.3rem;
+        margin-top: 3px;
     }
 
-    .sample-label {
-        font-size: 0.75rem;
-        color: #71808a;
-        margin-bottom: 0.3rem;
+    /* ========================================================
+       UPLOAD
+       ======================================================== */
+
+    .upload-note {
+        background: #f8fafb;
+        border: 1px dashed #cfdde1;
+        border-radius: 11px;
+        padding: 14px;
+        color: #718087;
+        font-size: 0.78rem;
+        text-align: center;
+        margin-top: 0.5rem;
     }
 
-    /* =========================
+    /* ========================================================
        SIDEBAR
-       ========================= */
+       ======================================================== */
 
-    .sidebar-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #183f4d;
+    [data-testid="stSidebar"] {
+        background: #f7fafb;
+        border-right: 1px solid #e1e9ec;
+    }
+
+    .sidebar-brand {
+        color: #163f4d;
+        font-size: 1.05rem;
+        font-weight: 750;
+        line-height: 1.3;
+    }
+
+    .sidebar-subtitle {
+        color: #77868d;
+        font-size: 0.74rem;
+        line-height: 1.5;
+        margin-top: 4px;
     }
 
     .sidebar-heading {
-        font-size: 0.88rem;
-        font-weight: 650;
-        color: #183f4d;
+        color: #234c59;
+        font-size: 0.75rem;
+        font-weight: 720;
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
         margin-top: 1rem;
-        margin-bottom: 0.3rem;
+        margin-bottom: 4px;
     }
 
     .sidebar-text {
-        color: #64748b;
-        font-size: 0.8rem;
+        color: #687a81;
+        font-size: 0.76rem;
         line-height: 1.55;
     }
 
-    /* =========================
+    .sidebar-author {
+        color: #234c59;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    /* ========================================================
        FOOTER
-       ========================= */
+       ======================================================== */
 
     .footer {
         text-align: center;
-        color: #94a3b8;
-        font-size: 0.76rem;
-        margin-top: 1.8rem;
+        padding-top: 1.8rem;
+        margin-top: 2rem;
+        border-top: 1px solid #edf1f2;
+        color: #8b999f;
+        font-size: 0.72rem;
+        line-height: 1.6;
+    }
+
+    /* ========================================================
+       BUTTONS
+       ======================================================== */
+
+    .stButton > button {
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    /* ========================================================
+       FILE UPLOADER
+       ======================================================== */
+
+    [data-testid="stFileUploader"] {
+        border-radius: 10px;
+    }
+
+    /* ========================================================
+       MOBILE
+       ======================================================== */
+
+    @media (max-width: 768px) {
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
     }
 
     </style>
@@ -371,7 +597,9 @@ def download_checkpoint():
     if os.path.exists(CHECKPOINT_PATH):
         return
 
-    with st.spinner("Preparing SonoInsight AI model..."):
+    with st.spinner(
+        "Preparing the trained model..."
+    ):
 
         response = requests.get(
             HF_CHECKPOINT_URL,
@@ -416,19 +644,15 @@ def load_model():
     if isinstance(checkpoint, dict):
 
         if "state_dict" in checkpoint:
-
             state_dict = checkpoint["state_dict"]
 
         elif "model_state_dict" in checkpoint:
-
             state_dict = checkpoint["model_state_dict"]
 
         else:
-
             state_dict = checkpoint
 
     else:
-
         state_dict = checkpoint
 
     model.load_state_dict(
@@ -462,7 +686,7 @@ transform = transforms.Compose([
 
 
 # ============================================================
-# BBOX LESION CROP
+# LESION CROP
 # ============================================================
 
 def make_lesion_crop(
@@ -539,7 +763,6 @@ def create_mask_overlay(
     )
 
     if not mask_binary.any():
-
         return image
 
     overlay = image_array.copy()
@@ -578,7 +801,7 @@ def create_mask_overlay(
 
 
 # ============================================================
-# GRAD-CAM CLASS
+# GRAD-CAM
 # ============================================================
 
 class GradCAM:
@@ -690,7 +913,6 @@ class GradCAM:
         maximum = cam.max()
 
         if maximum > 0:
-
             cam /= maximum
 
         return cam
@@ -698,7 +920,6 @@ class GradCAM:
     def remove_hooks(self):
 
         self.forward_hook.remove()
-
         self.backward_hook.remove()
 
 
@@ -864,7 +1085,7 @@ def predict(
 
 
 # ============================================================
-# BBOX FROM GRAD-CAM
+# BBOX FROM CAM
 # ============================================================
 
 def bbox_from_cam(
@@ -1040,25 +1261,406 @@ def generate_automatic_crop(
 
 
 # ============================================================
-# HERO SECTION
+# UI HELPERS
+# ============================================================
+
+def render_probability(
+    name,
+    value,
+    css_class
+):
+
+    percentage = value * 100
+
+    st.markdown(
+        f"""
+        <div class="prob-card">
+
+            <div class="prob-header">
+
+                <div class="prob-name">
+                    {name}
+                </div>
+
+                <div class="prob-value">
+                    {percentage:.1f}%
+                </div>
+
+            </div>
+
+            <div class="prob-track">
+
+                <div
+                    class="prob-fill {css_class}"
+                    style="width:{percentage:.1f}%"
+                ></div>
+
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def render_prediction(
+    prediction,
+    benign_probability,
+    malignant_probability
+):
+
+    if prediction == "Malignant":
+
+        result_color = "#a94d4d"
+
+        interpretation = (
+            "The model assigns the higher probability "
+            "to the malignant class."
+        )
+
+    else:
+
+        result_color = "#438568"
+
+        interpretation = (
+            "The model assigns the higher probability "
+            "to the benign class."
+        )
+
+    left, right = st.columns(
+        [0.9, 1.1],
+        gap="large"
+    )
+
+    with left:
+
+        st.markdown(
+            f"""
+            <div class="prediction-panel">
+
+                <div class="prediction-label">
+                    AI-assisted prediction
+                </div>
+
+                <div
+                    class="prediction-value"
+                    style="color:{result_color};"
+                >
+                    {prediction}
+                </div>
+
+                <div class="prediction-note">
+                    {interpretation}
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with right:
+
+        render_probability(
+            "Benign",
+            benign_probability,
+            "benign-fill"
+        )
+
+        render_probability(
+            "Malignant",
+            malignant_probability,
+            "malignant-fill"
+        )
+
+
+def render_explanation_section(
+    image,
+    gradcam_image,
+    crop_image,
+    mask=None
+):
+
+    st.markdown(
+        """
+        <div class="section-header">
+
+            <div class="section-title">
+                Visual Explanation
+            </div>
+
+            <div class="section-subtitle">
+                Grad-CAM provides a visual indication of regions
+                that contributed to the model prediction.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if mask is not None:
+
+        mask_overlay = create_mask_overlay(
+            image,
+            mask
+        )
+
+        v1, v2, v3 = st.columns(
+            3,
+            gap="medium"
+        )
+
+        with v1:
+
+            st.image(
+                image,
+                caption="Original Ultrasound",
+                use_container_width=True
+            )
+
+        with v2:
+
+            st.image(
+                mask_overlay,
+                caption="Reference Lesion Mask",
+                use_container_width=True
+            )
+
+        with v3:
+
+            st.image(
+                gradcam_image,
+                caption="Grad-CAM Attention",
+                use_container_width=True
+            )
+
+        st.markdown(
+            """
+            <div class="explain-card">
+
+                <div class="explain-title">
+                    Reference annotation available
+                </div>
+
+                <div class="explain-text">
+                    For representative BUS-BRA cases, the reference
+                    lesion mask can be viewed alongside the model's
+                    Grad-CAM attention map.
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    else:
+
+        v1, v2, v3 = st.columns(
+            3,
+            gap="medium"
+        )
+
+        with v1:
+
+            st.image(
+                image,
+                caption="Uploaded Ultrasound",
+                use_container_width=True
+            )
+
+        with v2:
+
+            st.image(
+                crop_image,
+                caption="AI-Generated Lesion View",
+                use_container_width=True
+            )
+
+        with v3:
+
+            st.image(
+                gradcam_image,
+                caption="Grad-CAM Attention",
+                use_container_width=True
+            )
+
+        st.markdown(
+            """
+            <div class="explain-card">
+
+                <div class="explain-title">
+                    No ground-truth annotation
+                </div>
+
+                <div class="explain-text">
+                    Uploaded images do not contain reference lesion
+                    masks. The highlighted region represents model
+                    attention and should not be interpreted as a
+                    definitive lesion segmentation.
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+# ============================================================
+# SIDEBAR
+# ============================================================
+
+with st.sidebar:
+
+    st.markdown(
+        """
+        <div class="sidebar-brand">
+            AI-Assisted Breast Ultrasound Analysis
+        </div>
+
+        <div class="sidebar-subtitle">
+            Breast ultrasound research prototype using
+            dual-view deep learning and explainable AI.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.divider()
+
+    st.markdown(
+        """
+        <div class="sidebar-heading">
+            About the Project
+        </div>
+
+        <div class="sidebar-text">
+            This project explores whether a dual-view deep learning
+            model can classify breast ultrasound lesions while
+            providing a visual explanation of model attention.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div class="sidebar-heading">
+            Model Classes
+        </div>
+
+        <div class="sidebar-text">
+            <strong>Benign</strong><br>
+            <strong>Malignant</strong>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div class="sidebar-heading">
+            Dual-View Architecture
+        </div>
+
+        <div class="sidebar-text">
+            The model combines information from the full ultrasound
+            image with a lesion-focused image representation.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div class="sidebar-heading">
+            Explainability
+        </div>
+
+        <div class="sidebar-text">
+            Grad-CAM highlights image regions associated with
+            the selected prediction.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div class="sidebar-heading">
+            Workflow
+        </div>
+
+        <div class="sidebar-text">
+            01 — Select a sample or upload an image<br>
+            02 — Generate AI prediction<br>
+            03 — Review probabilities<br>
+            04 — Explore visual explanation
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.divider()
+
+    st.markdown(
+        """
+        <div class="sidebar-heading">
+            Developed By
+        </div>
+
+        <div class="sidebar-author">
+            Zara Ashraf
+        </div>
+
+        <div class="sidebar-text">
+            BS Medical Imaging Technology
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div class="sidebar-heading">
+            Important
+        </div>
+
+        <div class="sidebar-text">
+            Research and educational use only.
+            This system is not intended for clinical diagnosis
+            or treatment decisions.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# ============================================================
+# HERO
 # ============================================================
 
 st.markdown(
     """
     <div class="hero">
 
-        <div class="hero-title">
-            SonoInsight AI
+        <div class="hero-badge">
+            BREAST ULTRASOUND • DEEP LEARNING • EXPLAINABLE AI
         </div>
 
-        <div class="hero-subtitle">
+        <div class="hero-title">
             AI-Assisted Breast Ultrasound Analysis
         </div>
 
+        <div class="hero-subtitle">
+            Dual-view deep learning for benign and malignant
+            lesion classification
+        </div>
+
         <div class="hero-description">
-            A research prototype exploring dual-view deep learning
-            for benign and malignant breast ultrasound classification,
-            supported by visual explainability through Grad-CAM.
+            A research prototype exploring how artificial intelligence
+            can complement medical imaging workflows by combining
+            whole-image and lesion-focused ultrasound information,
+            with visual interpretation through Grad-CAM.
         </div>
 
     </div>
@@ -1075,12 +1677,14 @@ st.markdown(
     """
     <div class="disclaimer">
 
-        <strong>Research & Educational Prototype</strong><br>
+        <div class="disclaimer-title">
+            Research & Educational Use Only
+        </div>
 
-        SonoInsight AI is developed for research and educational
-        demonstration only. It is not a medical device and should
-        not be used to diagnose, exclude, or guide treatment of
-        breast disease. AI predictions should never replace
+        This application is a research prototype developed for
+        breast ultrasound image analysis. It is not a medical device
+        and should not be used to diagnose disease, exclude disease,
+        or guide treatment. AI predictions should never replace
         assessment by a qualified healthcare professional.
 
     </div>
@@ -1090,56 +1694,64 @@ st.markdown(
 
 
 # ============================================================
-# MODEL OVERVIEW
+# MODEL AT A GLANCE
 # ============================================================
 
 st.markdown(
-    '<div class="section-title">Model Overview</div>',
+    """
+    <div class="section-header">
+
+        <div class="section-title">
+            Model at a Glance
+        </div>
+
+        <div class="section-subtitle">
+            A concise overview of the system used for this research prototype.
+        </div>
+
+    </div>
+    """,
     unsafe_allow_html=True
 )
 
-st.markdown(
-    '<div class="section-subtitle">'
-    'A dual-view architecture designed to examine both global '
-    'ultrasound appearance and a lesion-focused view.'
-    '</div>',
-    unsafe_allow_html=True
+c1, c2, c3, c4 = st.columns(
+    4,
+    gap="medium"
 )
-
-c1, c2, c3, c4 = st.columns(4)
 
 with c1:
 
     st.markdown(
         """
-        <div class="info-card">
+        <div class="model-card">
 
-            <div class="info-label">
+            <div class="model-label">
                 Architecture
             </div>
 
-            <div class="info-value">
-                Dual EfficientNet-B3
+            <div class="model-value">
+                Shared Dual<br>
+                EfficientNet-B3
             </div>
 
         </div>
         """,
         unsafe_allow_html=True
     )
-
 
 with c2:
 
     st.markdown(
         """
-        <div class="info-card">
+        <div class="model-card">
 
-            <div class="info-label">
-                Task
+            <div class="model-label">
+                Classification
             </div>
 
-            <div class="info-value">
-                Benign vs Malignant
+            <div class="model-value">
+                Benign<br>
+                vs Malignant
             </div>
 
         </div>
@@ -1147,18 +1759,17 @@ with c2:
         unsafe_allow_html=True
     )
 
-
 with c3:
 
     st.markdown(
         f"""
-        <div class="info-card">
+        <div class="model-card">
 
-            <div class="info-label">
+            <div class="model-label">
                 Input Resolution
             </div>
 
-            <div class="info-value">
+            <div class="model-value">
                 {IMAGE_SIZE} × {IMAGE_SIZE}
             </div>
 
@@ -1167,18 +1778,17 @@ with c3:
         unsafe_allow_html=True
     )
 
-
 with c4:
 
     st.markdown(
         """
-        <div class="info-card">
+        <div class="model-card">
 
-            <div class="info-label">
+            <div class="model-label">
                 Explainability
             </div>
 
-            <div class="info-value">
+            <div class="model-value">
                 Grad-CAM
             </div>
 
@@ -1189,11 +1799,19 @@ with c4:
 
 
 # ============================================================
-# WHY WAS IT DEVELOPED?
+# WHY THIS PROJECT
 # ============================================================
 
 st.markdown(
-    '<div class="section-title">Why was SonoInsight AI developed?</div>',
+    """
+    <div class="section-header">
+
+        <div class="section-title">
+            Why I Developed This Project
+        </div>
+
+    </div>
+    """,
     unsafe_allow_html=True
 )
 
@@ -1201,136 +1819,31 @@ st.markdown(
     """
     <div class="why-box">
 
-        As a Medical Imaging Technologist, I developed SonoInsight AI
-        to explore how artificial intelligence can complement medical
-        imaging workflows and make breast ultrasound analysis more
-        transparent.
+        As a <span class="why-highlight">Medical Imaging Technologist</span>,
+        I developed this project to explore how artificial intelligence
+        can complement medical imaging workflows and make breast
+        ultrasound analysis more transparent.
 
-        Breast ultrasound images can demonstrate substantial
-        variation in lesion appearance, making consistent image-based
-        assessment challenging. This project investigates whether a
-        dual-view deep learning approach can learn from both the
-        overall ultrasound image and a focused lesion representation.
+        <br><br>
 
-        Grad-CAM is included to provide a visual indication of regions
-        that contributed to the model's prediction, supporting the
-        interpretability of the system for research and educational
-        purposes.
+        Breast ultrasound images can demonstrate considerable variation
+        in lesion appearance, making consistent image-based assessment
+        challenging. This project investigates whether a dual-view
+        deep learning approach can learn from both the overall ultrasound
+        image and a focused lesion representation.
+
+        <br><br>
+
+        <span class="why-highlight">
+        The goal is not to replace the radiologist or medical imaging
+        professional, but to explore how AI can provide an additional,
+        explainable perspective during image analysis.
+        </span>
 
     </div>
     """,
     unsafe_allow_html=True
 )
-
-
-# ============================================================
-# SIDEBAR
-# ============================================================
-
-with st.sidebar:
-
-    st.markdown(
-        '<div class="sidebar-title">🩺 SonoInsight AI</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        """
-        <div class="sidebar-text">
-            Breast ultrasound research prototype using
-            dual-view deep learning and Grad-CAM.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.divider()
-
-    st.markdown(
-        '<div class="sidebar-heading">What does it analyze?</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        """
-        <div class="sidebar-text">
-            The model estimates whether an ultrasound lesion
-            belongs to the benign or malignant class.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="sidebar-heading">Model Classes</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        """
-        <div class="sidebar-text">
-            🟢 <strong>Benign</strong><br>
-            🔴 <strong>Malignant</strong>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="sidebar-heading">Dual-View Approach</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        """
-        <div class="sidebar-text">
-            The architecture combines information from the
-            full ultrasound image with a lesion-focused view.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="sidebar-heading">Explainability</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        """
-        <div class="sidebar-text">
-            Grad-CAM highlights image regions that contributed
-            to the selected model prediction.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="sidebar-heading">Important</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        """
-        <div class="sidebar-text">
-            This application is a research prototype.
-            AI output must not be interpreted as a clinical diagnosis.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.divider()
-
-    st.markdown(
-        '<div class="sidebar-heading">System</div>',
-        unsafe_allow_html=True
-    )
-
-    st.caption(
-        f"Device: {device}"
-    )
 
 
 # ============================================================
@@ -1357,24 +1870,29 @@ except Exception as error:
 # ============================================================
 
 st.markdown(
-    '<div class="section-title">Analyze Breast Ultrasound</div>',
-    unsafe_allow_html=True
-)
+    """
+    <div class="section-header">
 
-st.markdown(
-    '<div class="section-subtitle">'
-    'Explore representative cases or upload an ultrasound image '
-    'for an AI-assisted research analysis.'
-    '</div>',
+        <div class="section-title">
+            Explore the Analysis
+        </div>
+
+        <div class="section-subtitle">
+            Start with a representative BUS-BRA case or upload
+            your own ultrasound image for a research demonstration.
+        </div>
+
+    </div>
+    """,
     unsafe_allow_html=True
 )
 
 
 analysis_mode = st.radio(
-    "Analysis mode",
+    "Choose analysis mode",
     [
-        "Explore Sample Cases",
-        "Upload Your Ultrasound"
+        "Sample Cases",
+        "Upload Ultrasound"
     ],
     horizontal=True,
     label_visibility="collapsed"
@@ -1385,24 +1903,40 @@ analysis_mode = st.radio(
 # SAMPLE CASES
 # ============================================================
 
-if analysis_mode == "Explore Sample Cases":
+if analysis_mode == "Sample Cases":
 
     st.markdown(
-        "#### Representative BUS-BRA Cases"
-    )
+        """
+        <div class="workspace">
 
-    st.caption(
-        "Select a case to explore the reference lesion annotation, "
-        "model prediction, and Grad-CAM explanation."
+            <div class="workspace-title">
+                Representative BUS-BRA Cases
+            </div>
+
+            <div class="workspace-text">
+                Explore reference cases with known lesion annotations
+                and compare the model's prediction with Grad-CAM attention.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     sample_names = list(
         SAMPLES.keys()
     )
 
-    sample_cols = st.columns(4)
+    if "selected_sample" not in st.session_state:
 
-    selected_sample = None
+        st.session_state.selected_sample = (
+            sample_names[0]
+        )
+
+    sample_cols = st.columns(
+        4,
+        gap="medium"
+    )
 
     for index, sample_name in enumerate(
         sample_names
@@ -1434,11 +1968,11 @@ if analysis_mode == "Explore Sample Cases":
 
             st.markdown(
                 f"""
-                <div class="sample-title">
+                <div class="sample-name">
                     {sample_name}
                 </div>
 
-                <div class="sample-label">
+                <div class="sample-id">
                     {sample["id"]}
                 </div>
                 """,
@@ -1446,24 +1980,14 @@ if analysis_mode == "Explore Sample Cases":
             )
 
             if st.button(
-                "Explore",
+                "Explore case",
                 key=f"sample_{index}",
                 use_container_width=True
             ):
 
-                selected_sample = sample_name
-
-    if "selected_sample" not in st.session_state:
-
-        st.session_state.selected_sample = (
-            sample_names[0]
-        )
-
-    if selected_sample is not None:
-
-        st.session_state.selected_sample = (
-            selected_sample
-        )
+                st.session_state.selected_sample = (
+                    sample_name
+                )
 
     selected_sample = (
         st.session_state.selected_sample
@@ -1554,68 +2078,12 @@ if analysis_mode == "Explore Sample Cases":
 
         st.stop()
 
-    st.divider()
-
-    # ========================================================
-    # CASE INFORMATION
-    # ========================================================
-
     st.markdown(
-        "#### Case Information"
-    )
+        """
+        <div class="section-header">
 
-    i1, i2, i3 = st.columns(3)
-
-    with i1:
-
-        st.metric(
-            "Case ID",
-            sample["id"]
-        )
-
-    with i2:
-
-        st.metric(
-            "Reference Class",
-            sample["label"]
-        )
-
-    with i3:
-
-        st.metric(
-            "Histology",
-            sample["histology"]
-        )
-
-    # ========================================================
-    # AI ASSESSMENT
-    # ========================================================
-
-    st.markdown(
-        "#### AI Assessment"
-    )
-
-    if prediction == "Malignant":
-
-        result_color = "#b42318"
-
-    else:
-
-        result_color = "#177245"
-
-    st.markdown(
-        f"""
-        <div class="result-card">
-
-            <div class="result-label">
-                Model Prediction
-            </div>
-
-            <div
-                class="result-value"
-                style="color:{result_color};"
-            >
-                {prediction}
+            <div class="section-title">
+                Selected Case
             </div>
 
         </div>
@@ -1623,20 +2091,23 @@ if analysis_mode == "Explore Sample Cases":
         unsafe_allow_html=True
     )
 
-    p1, p2 = st.columns(2)
+    m1, m2, m3 = st.columns(
+        3,
+        gap="medium"
+    )
 
-    with p1:
+    with m1:
 
         st.markdown(
             f"""
-            <div class="probability-card">
+            <div class="case-meta">
 
-                <div class="probability-name">
-                    🟢 Benign Probability
+                <div class="case-meta-label">
+                    Case ID
                 </div>
 
-                <div class="probability-value">
-                    {benign_probability * 100:.1f}%
+                <div class="case-meta-value">
+                    {sample["id"]}
                 </div>
 
             </div>
@@ -1644,18 +2115,18 @@ if analysis_mode == "Explore Sample Cases":
             unsafe_allow_html=True
         )
 
-    with p2:
+    with m2:
 
         st.markdown(
             f"""
-            <div class="probability-card">
+            <div class="case-meta">
 
-                <div class="probability-name">
-                    🔴 Malignant Probability
+                <div class="case-meta-label">
+                    Reference Class
                 </div>
 
-                <div class="probability-value">
-                    {malignant_probability * 100:.1f}%
+                <div class="case-meta-value">
+                    {sample["label"]}
                 </div>
 
             </div>
@@ -1663,84 +2134,100 @@ if analysis_mode == "Explore Sample Cases":
             unsafe_allow_html=True
         )
 
-    # ========================================================
-    # VISUAL EXPLANATION
-    # ========================================================
+    with m3:
+
+        st.markdown(
+            f"""
+            <div class="case-meta">
+
+                <div class="case-meta-label">
+                    Histology
+                </div>
+
+                <div class="case-meta-value">
+                    {sample["histology"]}
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # --------------------------------------------------------
+    # AI RESULT
+    # --------------------------------------------------------
 
     st.markdown(
-        "#### Visual Explanation"
+        """
+        <div class="section-header">
+
+            <div class="section-title">
+                AI Assessment
+            </div>
+
+            <div class="section-subtitle">
+                Model prediction and class probabilities.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.caption(
-        "Compare the reference lesion annotation with the "
-        "regions highlighted by the model."
+    render_prediction(
+        prediction,
+        benign_probability,
+        malignant_probability
     )
 
-    v1, v2, v3 = st.columns(3)
+    # --------------------------------------------------------
+    # EXPLANATION
+    # --------------------------------------------------------
 
-    with v1:
-
-        if mask is not None:
-
-            mask_overlay = create_mask_overlay(
-                image,
-                mask
-            )
-
-            st.image(
-                mask_overlay,
-                caption="Ground-Truth Lesion Mask",
-                use_container_width=True
-            )
-
-        else:
-
-            st.image(
-                image,
-                caption="Original Ultrasound",
-                use_container_width=True
-            )
-
-    with v2:
-
-        st.image(
-            gradcam_image,
-            caption="Grad-CAM Attention",
-            use_container_width=True
-        )
-
-    with v3:
-
-        st.image(
-            crop_image,
-            caption="Lesion-Focused Model View",
-            use_container_width=True
-        )
+    render_explanation_section(
+        image,
+        gradcam_image,
+        crop_image,
+        mask=mask
+    )
 
 
 # ============================================================
-# UPLOAD ANALYSIS
+# UPLOAD
 # ============================================================
 
 else:
 
     st.markdown(
-        "#### Upload Your Ultrasound"
-    )
+        """
+        <div class="workspace">
 
-    st.caption(
-        "Upload a breast ultrasound image for a research "
-        "demonstration of the model's prediction and visual attention."
+            <div class="workspace-title">
+                Upload a Breast Ultrasound
+            </div>
+
+            <div class="workspace-text">
+                Upload a PNG, JPG or JPEG ultrasound image.
+                The system will generate an AI-assisted prediction,
+                probabilities and a Grad-CAM visualization.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     uploaded_file = st.file_uploader(
-        "Choose an ultrasound image",
+        "Upload ultrasound image",
         type=[
             "png",
             "jpg",
             "jpeg"
         ],
-        help="PNG, JPG and JPEG images are supported."
+        help=(
+            "PNG, JPG and JPEG images are supported. "
+            "Do not upload patient-identifying information."
+        )
     )
 
     if uploaded_file is None:
@@ -1748,8 +2235,8 @@ else:
         st.markdown(
             """
             <div class="upload-note">
-                For research demonstration only.
-                Please do not upload patient-identifying information.
+                Research demonstration only ·
+                Please remove or avoid patient-identifying information.
             </div>
             """,
             unsafe_allow_html=True
@@ -1763,21 +2250,61 @@ else:
 
         width, height = image.size
 
-        st.image(
-            image,
-            caption="Uploaded Ultrasound",
-            width=520
+        left, right = st.columns(
+            [1.25, 0.75],
+            gap="large"
         )
 
-        st.caption(
-            f"Image dimensions: {width} × {height} pixels"
-        )
+        with left:
 
-        if st.button(
-            "🔍 Analyze Ultrasound",
+            st.image(
+                image,
+                caption="Uploaded Ultrasound",
+                use_container_width=True
+            )
+
+        with right:
+
+            st.markdown(
+                """
+                <div class="prediction-panel">
+
+                    <div class="prediction-label">
+                        Image Information
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            st.write(
+                f"**Dimensions:** {width} × {height} px"
+            )
+
+            st.write(
+                "**Format:** "
+                f"{uploaded_file.type}"
+            )
+
+            st.write(
+                "**Analysis:** "
+                "Dual-view classification"
+            )
+
+            st.write(
+                "**Explainability:** Grad-CAM"
+            )
+
+        st.markdown("")
+
+        analyze = st.button(
+            "Analyze Ultrasound",
             type="primary",
             use_container_width=True
-        ):
+        )
+
+        if analyze:
 
             try:
 
@@ -1824,37 +2351,16 @@ else:
                         )
                     )
 
-                st.divider()
-
-                # ====================================================
-                # RESULT
-                # ====================================================
-
                 st.markdown(
-                    "#### AI Assessment"
-                )
+                    """
+                    <div class="section-header">
 
-                if prediction == "Malignant":
-
-                    result_color = "#b42318"
-
-                else:
-
-                    result_color = "#177245"
-
-                st.markdown(
-                    f"""
-                    <div class="result-card">
-
-                        <div class="result-label">
-                            Model Prediction
+                        <div class="section-title">
+                            AI Assessment
                         </div>
 
-                        <div
-                            class="result-value"
-                            style="color:{result_color};"
-                        >
-                            {prediction}
+                        <div class="section-subtitle">
+                            Model prediction and class probabilities.
                         </div>
 
                     </div>
@@ -1862,89 +2368,17 @@ else:
                     unsafe_allow_html=True
                 )
 
-                p1, p2 = st.columns(2)
-
-                with p1:
-
-                    st.markdown(
-                        f"""
-                        <div class="probability-card">
-
-                            <div class="probability-name">
-                                🟢 Benign Probability
-                            </div>
-
-                            <div class="probability-value">
-                                {benign_probability * 100:.1f}%
-                            </div>
-
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-                with p2:
-
-                    st.markdown(
-                        f"""
-                        <div class="probability-card">
-
-                            <div class="probability-name">
-                                🔴 Malignant Probability
-                            </div>
-
-                            <div class="probability-value">
-                                {malignant_probability * 100:.1f}%
-                            </div>
-
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-                # ====================================================
-                # VISUAL EXPLANATION
-                # ====================================================
-
-                st.markdown(
-                    "#### Visual Explanation"
+                render_prediction(
+                    prediction,
+                    benign_probability,
+                    malignant_probability
                 )
 
-                st.caption(
-                    "The lesion-focused view is generated automatically "
-                    "using model attention."
-                )
-
-                v1, v2, v3 = st.columns(3)
-
-                with v1:
-
-                    st.image(
-                        image,
-                        caption="Uploaded Ultrasound",
-                        use_container_width=True
-                    )
-
-                with v2:
-
-                    st.image(
-                        gradcam_image,
-                        caption="Grad-CAM Attention",
-                        use_container_width=True
-                    )
-
-                with v3:
-
-                    st.image(
-                        crop_image,
-                        caption="AI-Generated Lesion View",
-                        use_container_width=True
-                    )
-
-                st.info(
-                    "Reference lesion masks are available only for "
-                    "the representative BUS-BRA sample cases. "
-                    "Uploaded images do not include ground-truth annotations."
+                render_explanation_section(
+                    image,
+                    gradcam_image,
+                    crop_image,
+                    mask=None
                 )
 
             except Exception as error:
@@ -1957,51 +2391,62 @@ else:
 
 
 # ============================================================
-# TECHNICAL MODEL INFORMATION
+# TECHNICAL INFORMATION
 # ============================================================
 
-st.divider()
+st.markdown("")
 
 with st.expander(
     "Technical Model Information"
 ):
 
-    m1, m2 = st.columns(2)
+    t1, t2 = st.columns(
+        2,
+        gap="large"
+    )
 
-    with m1:
+    with t1:
 
-        st.write(
-            "**Architecture:** Shared Dual EfficientNet-B3"
+        st.markdown(
+            "**Architecture**  \n"
+            "Shared Dual EfficientNet-B3"
         )
 
-        st.write(
-            "**Classification:** Benign vs Malignant"
+        st.markdown(
+            "**Classification**  \n"
+            "Benign vs Malignant"
         )
 
-        st.write(
-            f"**Input resolution:** {IMAGE_SIZE} × {IMAGE_SIZE}"
+        st.markdown(
+            f"**Input resolution**  \n"
+            "{IMAGE_SIZE} × {IMAGE_SIZE}"
         )
 
-        st.write(
-            f"**Decision threshold:** {THRESHOLD}"
+        st.markdown(
+            f"**Decision threshold**  \n"
+            "{THRESHOLD}"
         )
 
-    with m2:
+    with t2:
 
-        st.write(
-            f"**Inference device:** {device}"
+        st.markdown(
+            f"**Inference device**  \n"
+            "{device}"
         )
 
-        st.write(
-            "**Explainability:** Grad-CAM"
+        st.markdown(
+            "**Explainability**  \n"
+            "Grad-CAM"
         )
 
-        st.write(
-            "**Sample localization:** BUS-BRA BBOX"
+        st.markdown(
+            "**Sample localization**  \n"
+            "BUS-BRA lesion BBOX"
         )
 
-        st.write(
-            "**Upload localization:** AI-generated attention crop"
+        st.markdown(
+            "**Upload localization**  \n"
+            "AI-generated attention crop"
         )
 
 
@@ -2012,7 +2457,20 @@ with st.expander(
 st.markdown(
     """
     <div class="footer">
-        SonoInsight AI · Breast Ultrasound Research Prototype
+
+        <strong>
+            AI-Assisted Breast Ultrasound Analysis
+        </strong>
+        <br>
+
+        Breast Ultrasound Research Prototype
+        <br><br>
+
+        Developed by <strong>Zara Ashraf</strong>
+        <br>
+
+        BS Medical Imaging Technology
+
     </div>
     """,
     unsafe_allow_html=True
