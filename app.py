@@ -1475,82 +1475,57 @@ else:
     st.write("")
 
     st.caption(
-        "Explore representative BUS-BRA cases and compare "
-        "the model prediction with reference information."
+        "Explore representative BUS-BRA ultrasound cases "
+        "and see how the model analyzes each lesion."
     )
 
-    # ========================================================
-    # SAMPLE CASE THUMBNAILS
-    # ========================================================
+    # --------------------------------------------------------
+    # SAMPLE CASE SELECTOR
+    # --------------------------------------------------------
 
-    sample_names = list(
-        SAMPLES.keys()
-    )
+    sample_names = list(SAMPLES.keys())
 
     if "selected_sample" not in st.session_state:
-
-        st.session_state.selected_sample = (
-            sample_names[0]
-        )
+        st.session_state.selected_sample = sample_names[0]
 
     st.markdown(
-        "#### Explore Sample Cases"
+        "#### Representative Sample Cases"
     )
 
     st.caption(
-        "Select a representative case to explore the "
-        "ultrasound and model analysis."
+        "Select a case to view its ultrasound analysis."
     )
 
     sample_cols = st.columns(
-        len(sample_names),
+        4,
         gap="medium",
     )
 
-    for index, sample_name in enumerate(
-        sample_names
-    ):
+    for i, sample_name in enumerate(sample_names):
 
-        sample_data = SAMPLES[
-            sample_name
-        ]
+        sample_item = SAMPLES[sample_name]
 
         sample_image_path = os.path.join(
             BASE_DIR,
-            sample_data["image"],
+            sample_item["image"],
         )
 
-        with sample_cols[index]:
+        with sample_cols[i]:
 
-            if os.path.exists(
-                sample_image_path
-            ):
+            if os.path.exists(sample_image_path):
 
-                thumbnail = Image.open(
+                sample_thumb = Image.open(
                     sample_image_path
                 ).convert("RGB")
 
                 st.image(
-                    thumbnail,
+                    sample_thumb,
                     use_container_width=True,
                 )
 
-            # Short display name
-            if "Benign" in sample_name:
-
-                display_name = (
-                    f"Sample {index + 1} · Benign"
-                )
-
-            else:
-
-                display_name = (
-                    f"Sample {index + 1} · Malignant"
-                )
-
             if st.button(
-                display_name,
-                key=f"sample_select_{index}",
+                f"Sample {i + 1}",
+                key=f"sample_button_{i}",
                 use_container_width=True,
             ):
 
@@ -1558,17 +1533,21 @@ else:
                     sample_name
                 )
 
-    sample_selector = (
+    # --------------------------------------------------------
+    # SELECTED SAMPLE
+    # --------------------------------------------------------
+
+    selected_sample_name = (
         st.session_state.selected_sample
     )
 
     sample = SAMPLES[
-        sample_selector
+        selected_sample_name
     ]
 
-    # ========================================================
-    # LOAD SAMPLE
-    # ========================================================
+    # --------------------------------------------------------
+    # LOAD IMAGE
+    # --------------------------------------------------------
 
     image_path = os.path.join(
         BASE_DIR,
@@ -1580,12 +1559,10 @@ else:
         sample["mask"],
     )
 
-    if not os.path.exists(
-        image_path
-    ):
+    if not os.path.exists(image_path):
 
         st.error(
-            "The selected sample image could not be found."
+            "Selected sample image could not be found."
         )
 
         st.stop()
@@ -1596,99 +1573,24 @@ else:
 
     mask = None
 
-    if os.path.exists(
-        mask_path
-    ):
+    if os.path.exists(mask_path):
 
         mask = Image.open(
             mask_path
         ).convert("L")
 
-    # ========================================================
-    # SELECTED SAMPLE
-    # ========================================================
-
-    st.write("")
-
-    st.markdown(
-        "### Selected Sample"
-    )
-
-    st.caption(
-        "Representative BUS-BRA case for research "
-        "and educational demonstration."
-    )
-
-    # ========================================================
-    # ORIGINAL IMAGE + REFERENCE
-    # ========================================================
-
-    image_col, reference_col = st.columns(
-        [2.2, 1],
-        gap="large",
-    )
-
-    with image_col:
-
-        st.image(
-            image,
-            caption="Original Ultrasound",
-            use_container_width=True,
-        )
-
-    with reference_col:
-
-        st.markdown(
-            "#### Reference"
-        )
-
-        st.markdown(
-            f"""
-            <div style="
-                font-size: 1.65rem;
-                font-weight: 750;
-                color: #173f4d;
-                margin: 0.25rem 0 0.25rem 0;
-            ">
-                {sample["label"]}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        st.caption(
-            "Reference class"
-        )
-
-        st.write("")
-
-        st.markdown(
-            "**Histology**"
-        )
-
-        st.write(
-            sample["histology"]
-        )
-
-        st.write("")
-
-        st.caption(
-            "Reference information is shown for "
-            "comparison with the AI prediction."
-        )
-
-    # ========================================================
-    # LESION CROP
-    # ========================================================
+    # --------------------------------------------------------
+    # LESION-FOCUSED VIEW
+    # --------------------------------------------------------
 
     crop_image = make_lesion_crop(
         image,
         sample["bbox"],
     )
 
-    # ========================================================
+    # --------------------------------------------------------
     # MODEL ANALYSIS
-    # ========================================================
+    # --------------------------------------------------------
 
     try:
 
@@ -1717,11 +1619,9 @@ else:
             predicted_class,
         )
 
-        gradcam_image = (
-            create_gradcam_overlay(
-                image,
-                cam,
-            )
+        gradcam_image = create_gradcam_overlay(
+            image,
+            cam,
         )
 
     except Exception as error:
@@ -1734,128 +1634,19 @@ else:
 
         st.stop()
 
-    # ========================================================
-    # AI ASSESSMENT
-    # ========================================================
-
-    st.divider()
-
-    st.subheader(
-        "AI Assessment"
-    )
-
-    if prediction == "Benign":
-
-        st.success(
-            "Model prediction: **BENIGN**"
-        )
-
-    else:
-
-        st.error(
-            "Model prediction: **MALIGNANT**"
-        )
+    # --------------------------------------------------------
+    # SELECTED CASE LABEL
+    # --------------------------------------------------------
 
     st.write("")
 
-    prob1, prob2 = st.columns(
-        2,
-        gap="large",
+    st.markdown(
+        f"### {selected_sample_name}"
     )
 
-    with prob1:
-
-        st.metric(
-            "Benign",
-            f"{benign_probability * 100:.1f}%",
-        )
-
-        st.progress(
-            benign_probability
-        )
-
-    with prob2:
-
-        st.metric(
-            "Malignant",
-            f"{malignant_probability * 100:.1f}%",
-        )
-
-        st.progress(
-            malignant_probability
-        )
-
-    st.caption(
-        f"Decision threshold: {THRESHOLD:.2f}"
-    )
-
-    # ========================================================
-    # REFERENCE COMPARISON
-    # ========================================================
-
-    st.write("")
-
-    comparison_col1, comparison_col2 = st.columns(
-        2,
-        gap="large",
-    )
-
-    with comparison_col1:
-
-        st.caption(
-            "REFERENCE"
-        )
-
-        st.markdown(
-            f"**{sample['label']}**"
-        )
-
-        st.caption(
-            sample["histology"]
-        )
-
-    with comparison_col2:
-
-        st.caption(
-            "AI PREDICTION"
-        )
-
-        st.markdown(
-            f"**{prediction}**"
-        )
-
-        if prediction == sample["label"]:
-
-            st.caption(
-                "Prediction matches the reference class."
-            )
-
-        else:
-
-            st.caption(
-                "Prediction differs from the reference class."
-            )
-
-    # ========================================================
-    # SAMPLE DISCLAIMER
-    # ========================================================
-
-    st.info(
-        """
-        **Research & Educational Prototype**
-
-        This representative case is provided for research and
-        educational demonstration only. Reference information
-        is shown for comparison and the AI prediction is not
-        a clinical diagnosis. This system should not be used
-        to diagnose, exclude, or guide treatment of breast
-        disease.
-        """
-    )
-
-    # ========================================================
+    # --------------------------------------------------------
     # VISUAL EXPLANATION
-    # ========================================================
+    # --------------------------------------------------------
 
     st.write("")
 
@@ -1864,8 +1655,8 @@ else:
     )
 
     st.caption(
-        "Compare the original ultrasound, lesion-focused "
-        "representation, and Grad-CAM model attention."
+        "Compare the original ultrasound, the lesion-focused "
+        "view, and the regions highlighted by Grad-CAM."
     )
 
     visual1, visual2, visual3 = st.columns(
@@ -1897,36 +1688,119 @@ else:
             use_container_width=True,
         )
 
-    # ========================================================
-    # REFERENCE MASK
-    # ========================================================
+    # --------------------------------------------------------
+    # AI ASSESSMENT + REFERENCE
+    # --------------------------------------------------------
 
-    if mask is not None:
+    st.write("")
+
+    assessment_col, reference_col = st.columns(
+        [1.35, 1],
+        gap="large",
+    )
+
+    with assessment_col:
+
+        st.subheader(
+            "AI Assessment"
+        )
+
+        if prediction == "Benign":
+
+            st.success(
+                "Model prediction: **BENIGN**"
+            )
+
+        else:
+
+            st.error(
+                "Model prediction: **MALIGNANT**"
+            )
 
         st.write("")
 
-        with st.expander(
-            "View Reference Lesion Annotation",
-            expanded=False,
-        ):
+        prob1, prob2 = st.columns(2)
 
-            mask_overlay = create_mask_overlay(
-                image,
-                mask,
+        with prob1:
+
+            st.metric(
+                "Benign",
+                f"{benign_probability * 100:.1f}%",
             )
 
-            st.image(
-                mask_overlay,
-                caption="Reference Lesion Mask",
-                use_container_width=True,
+            st.progress(
+                benign_probability
             )
 
-            st.caption(
-                "The reference annotation is provided by the "
-                "BUS-BRA dataset for research comparison. "
-                "It is not generated by the AI model."
+        with prob2:
+
+            st.metric(
+                "Malignant",
+                f"{malignant_probability * 100:.1f}%",
             )
 
+            st.progress(
+                malignant_probability
+            )
+
+        st.caption(
+            f"Decision threshold: {THRESHOLD:.2f}"
+        )
+
+    with reference_col:
+
+        st.subheader(
+            "Reference Information"
+        )
+
+        st.caption(
+            "DATASET REFERENCE"
+        )
+
+        st.markdown(
+            f"**{sample['label']}**"
+        )
+
+        st.caption(
+            "HISTOLOGY"
+        )
+
+        st.markdown(
+            f"**{sample['histology']}**"
+        )
+
+        st.caption(
+            "Reference information is shown only "
+            "for dataset comparison."
+        )
+
+    # --------------------------------------------------------
+    # DISCLAIMER
+    # --------------------------------------------------------
+
+    st.write("")
+
+    st.info(
+        """
+        **Research & Educational Prototype**
+
+        This sample case is provided for research and
+        educational demonstration only. The reference
+        information belongs to the dataset and the AI
+        prediction is not a clinical diagnosis. This
+        application should not be used to diagnose,
+        exclude, or guide treatment of breast disease.
+        AI predictions should not replace assessment by
+        a qualified healthcare professional.
+        """
+    )
+
+    st.caption(
+        "The lesion-focused view uses the reference lesion "
+        "region available for this representative BUS-BRA case. "
+        "Grad-CAM indicates model attention and is not a "
+        "definitive lesion segmentation."
+    )
 
 # ============================================================
 # TECHNICAL INFORMATION
