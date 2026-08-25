@@ -1940,6 +1940,33 @@ with assessment_col:
             f"Probability separation: "
             f"{probability_separation * 100:.1f} percentage points"
         )
+# --------------------------------------------------------
+    # DISCLAIMER
+    # --------------------------------------------------------
+
+    st.write("")
+
+    st.info(
+        """
+        **Research & Educational Prototype**
+
+        This sample case is provided for research and
+        educational demonstration only. The reference
+        information belongs to the dataset and the AI
+        prediction is not a clinical diagnosis. This
+        application should not be used to diagnose,
+        exclude, or guide treatment of breast disease.
+        AI predictions should not replace assessment by
+        a qualified healthcare professional.
+        """
+    )
+
+    st.caption(
+        "The lesion-focused view uses the reference lesion "
+        "region available for this representative BUS-BRA case. "
+        "Grad-CAM indicates model attention and is not a "
+        "definitive lesion segmentation."
+    )
 
 with reference_col:
 
@@ -1967,33 +1994,7 @@ with reference_col:
         "Reference information is shown only "
         "for dataset comparison."
     )
-    # --------------------------------------------------------
-    # DISCLAIMER
-    # --------------------------------------------------------
-
-    st.write("")
-
-    st.info(
-        """
-        **Research & Educational Prototype**
-
-        This sample case is provided for research and
-        educational demonstration only. The reference
-        information belongs to the dataset and the AI
-        prediction is not a clinical diagnosis. This
-        application should not be used to diagnose,
-        exclude, or guide treatment of breast disease.
-        AI predictions should not replace assessment by
-        a qualified healthcare professional.
-        """
-    )
-
-    st.caption(
-        "The lesion-focused view uses the reference lesion "
-        "region available for this representative BUS-BRA case. "
-        "Grad-CAM indicates model attention and is not a "
-        "definitive lesion segmentation."
-    )
+   
 
 # ============================================================
 # TECHNICAL INFORMATION
