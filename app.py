@@ -1160,7 +1160,8 @@ if mode == "Upload Ultrasound":
             "before uploading."
         ),
     )
- if uploaded_file is None:
+
+    if uploaded_file is None:
 
         st.write("")
 
@@ -1182,7 +1183,6 @@ if mode == "Upload Ultrasound":
         ).convert("RGB")
 
         width, height = image.size
-   
 
         st.write("")
 
