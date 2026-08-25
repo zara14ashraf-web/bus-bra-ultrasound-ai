@@ -25,7 +25,7 @@ st.set_page_config(
 
 
 # ============================================================
-# LIGHTWEIGHT CSS
+# SIMPLE CUSTOM CSS
 # ============================================================
 
 st.markdown(
@@ -33,65 +33,58 @@ st.markdown(
     <style>
 
     .block-container {
-        max-width: 1180px;
-        padding-top: 1.2rem;
+        max-width: 1200px;
+        padding-top: 1.5rem;
         padding-bottom: 3rem;
     }
 
-    /* Hero */
     .hero-title {
-        font-size: 2.6rem;
-        font-weight: 750;
         text-align: center;
-        color: #163f4d;
-        margin-bottom: 0.25rem;
+        font-size: 2.55rem;
+        font-weight: 750;
+        color: #173f4d;
+        margin-bottom: 0.2rem;
     }
 
     .hero-subtitle {
         text-align: center;
-        color: #607984;
         font-size: 1.05rem;
-        margin-bottom: 0.7rem;
+        color: #607984;
+        margin-bottom: 0.75rem;
     }
 
-    .hero-text {
-        max-width: 760px;
-        margin: auto;
+    .hero-description {
+        max-width: 780px;
+        margin: 0 auto;
         text-align: center;
         color: #71838b;
-        line-height: 1.6;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
+        line-height: 1.65;
     }
 
-    /* Section headings */
-    .section-title {
-        color: #163f4d;
-        font-size: 1.45rem;
-        font-weight: 700;
-        margin-top: 1.6rem;
-        margin-bottom: 0.15rem;
-    }
-
-    .section-text {
-        color: #74848b;
+    .small-muted {
+        color: #71838b;
         font-size: 0.86rem;
-        margin-bottom: 0.8rem;
     }
 
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #f7fafb;
+    .result-number {
+        font-size: 2.1rem;
+        font-weight: 750;
+        margin-top: 0.2rem;
     }
 
-    /* Footer */
-    .footer-text {
+    .footer {
         text-align: center;
-        color: #8b999f;
+        color: #8a989e;
         font-size: 0.75rem;
         line-height: 1.6;
-        margin-top: 2rem;
         padding-top: 1.5rem;
-        border-top: 1px solid #e7edef;
+        margin-top: 2rem;
+        border-top: 1px solid #e5eaed;
+    }
+
+    [data-testid="stSidebar"] {
+        background-color: #f7fafb;
     }
 
     </style>
@@ -126,7 +119,7 @@ HF_CHECKPOINT_URL = (
 
 
 # ============================================================
-# MODEL CONFIG
+# MODEL CONFIGURATION
 # ============================================================
 
 MODEL_NAME = "SharedDualEfficientNetB3"
@@ -140,13 +133,13 @@ CROP_MARGIN = 0.25
 MEAN = [
     0.485,
     0.456,
-    0.406
+    0.406,
 ]
 
 STD = [
     0.229,
     0.224,
-    0.225
+    0.225,
 ]
 
 
@@ -206,7 +199,7 @@ device = torch.device(
 
 
 # ============================================================
-# DOWNLOAD CHECKPOINT
+# DOWNLOAD MODEL
 # ============================================================
 
 def download_checkpoint():
@@ -215,20 +208,20 @@ def download_checkpoint():
         return
 
     with st.spinner(
-        "Preparing the trained model..."
+        "Preparing the AI model for the first use..."
     ):
 
         response = requests.get(
             HF_CHECKPOINT_URL,
             stream=True,
-            timeout=300
+            timeout=300,
         )
 
         response.raise_for_status()
 
         with open(
             CHECKPOINT_PATH,
-            "wb"
+            "wb",
         ) as file:
 
             for chunk in response.iter_content(
@@ -255,26 +248,30 @@ def load_model():
     checkpoint = torch.load(
         CHECKPOINT_PATH,
         map_location=device,
-        weights_only=False
+        weights_only=False,
     )
 
     if isinstance(checkpoint, dict):
 
         if "state_dict" in checkpoint:
+
             state_dict = checkpoint["state_dict"]
 
         elif "model_state_dict" in checkpoint:
+
             state_dict = checkpoint["model_state_dict"]
 
         else:
+
             state_dict = checkpoint
 
     else:
+
         state_dict = checkpoint
 
     model.load_state_dict(
         state_dict,
-        strict=True
+        strict=True,
     )
 
     model = model.to(device)
@@ -293,12 +290,10 @@ transform = transforms.Compose(
         transforms.Resize(
             (IMAGE_SIZE, IMAGE_SIZE)
         ),
-
         transforms.ToTensor(),
-
         transforms.Normalize(
             mean=MEAN,
-            std=STD
+            std=STD,
         ),
     ]
 )
@@ -311,7 +306,7 @@ transform = transforms.Compose(
 def make_lesion_crop(
     image,
     bbox,
-    margin=CROP_MARGIN
+    margin=CROP_MARGIN,
 ):
 
     x, y, width, height = [
@@ -326,22 +321,22 @@ def make_lesion_crop(
 
     x1 = max(
         0,
-        x - pad_x
+        x - pad_x,
     )
 
     y1 = max(
         0,
-        y - pad_y
+        y - pad_y,
     )
 
     x2 = min(
         image_width,
-        x + width + pad_x
+        x + width + pad_x,
     )
 
     y2 = min(
         image_height,
-        y + height + pad_y
+        y + height + pad_y,
     )
 
     return image.crop(
@@ -355,7 +350,7 @@ def make_lesion_crop(
 
 def create_mask_overlay(
     image,
-    mask
+    mask,
 ):
 
     image = image.convert("RGB")
@@ -382,6 +377,7 @@ def create_mask_overlay(
     )
 
     if not mask_binary.any():
+
         return image
 
     overlay = image_array.copy()
@@ -409,7 +405,7 @@ def create_mask_overlay(
     result = np.clip(
         result,
         0,
-        255
+        255,
     ).astype(
         np.uint8
     )
@@ -428,7 +424,7 @@ class GradCAM:
     def __init__(
         self,
         model,
-        target_layer
+        target_layer,
     ):
 
         self.model = model
@@ -452,7 +448,7 @@ class GradCAM:
         self,
         module,
         inputs,
-        output
+        output,
     ):
 
         self.activations = output
@@ -461,7 +457,7 @@ class GradCAM:
         self,
         module,
         grad_input,
-        grad_output
+        grad_output,
     ):
 
         self.gradients = grad_output[0]
@@ -470,7 +466,7 @@ class GradCAM:
         self,
         full_tensor,
         crop_tensor,
-        target_class
+        target_class,
     ):
 
         self.model.zero_grad(
@@ -479,12 +475,12 @@ class GradCAM:
 
         logits = self.model(
             full_tensor,
-            crop_tensor
+            crop_tensor,
         )
 
         score = logits[
             0,
-            target_class
+            target_class,
         ]
 
         score.backward()
@@ -494,14 +490,14 @@ class GradCAM:
 
         weights = gradients.mean(
             dim=(2, 3),
-            keepdim=True
+            keepdim=True,
         )
 
         cam = (
             weights * activations
         ).sum(
             dim=1,
-            keepdim=True
+            keepdim=True,
         )
 
         cam = F.relu(cam)
@@ -510,15 +506,15 @@ class GradCAM:
             cam,
             size=(
                 IMAGE_SIZE,
-                IMAGE_SIZE
+                IMAGE_SIZE,
             ),
             mode="bilinear",
-            align_corners=False
+            align_corners=False,
         )
 
         cam = cam[
             0,
-            0
+            0,
         ]
 
         cam = (
@@ -532,6 +528,7 @@ class GradCAM:
         maximum = cam.max()
 
         if maximum > 0:
+
             cam /= maximum
 
         return cam
@@ -550,7 +547,7 @@ def generate_gradcam(
     model,
     full_tensor,
     crop_tensor,
-    predicted_class
+    predicted_class,
 ):
 
     target_layer = (
@@ -559,7 +556,7 @@ def generate_gradcam(
 
     gradcam = GradCAM(
         model,
-        target_layer
+        target_layer,
     )
 
     try:
@@ -567,7 +564,7 @@ def generate_gradcam(
         cam = gradcam.generate(
             full_tensor,
             crop_tensor,
-            predicted_class
+            predicted_class,
         )
 
     finally:
@@ -583,13 +580,13 @@ def generate_gradcam(
 
 def create_gradcam_overlay(
     image,
-    cam
+    cam,
 ):
 
     image_resized = image.resize(
         (
             IMAGE_SIZE,
-            IMAGE_SIZE
+            IMAGE_SIZE,
         )
     )
 
@@ -609,9 +606,9 @@ def create_gradcam_overlay(
         (
             IMAGE_SIZE,
             IMAGE_SIZE,
-            3
+            3,
         ),
-        dtype=np.float32
+        dtype=np.float32,
     )
 
     heatmap[:, :, 0] = cam_uint8
@@ -634,7 +631,7 @@ def create_gradcam_overlay(
     overlay = np.clip(
         overlay,
         0,
-        1
+        1,
     )
 
     return Image.fromarray(
@@ -653,7 +650,7 @@ def create_gradcam_overlay(
 def predict(
     model,
     image,
-    crop_image
+    crop_image,
 ):
 
     full_tensor = transform(
@@ -672,12 +669,12 @@ def predict(
 
         logits = model(
             full_tensor,
-            crop_tensor
+            crop_tensor,
         )
 
         probabilities = torch.softmax(
             logits,
-            dim=1
+            dim=1,
         )[0]
 
     benign_probability = (
@@ -704,14 +701,14 @@ def predict(
 
 
 # ============================================================
-# BBOX FROM GRAD-CAM
+# BBOX FROM CAM
 # ============================================================
 
 def bbox_from_cam(
     cam,
     original_size,
     threshold_ratio=0.55,
-    padding_ratio=0.20
+    padding_ratio=0.20,
 ):
 
     image_width, image_height = (
@@ -731,7 +728,7 @@ def bbox_from_cam(
             0,
             0,
             image_width,
-            image_height
+            image_height,
         ]
 
     ys, xs = np.where(
@@ -776,28 +773,28 @@ def bbox_from_cam(
     x1 = int(
         max(
             0,
-            x1 * scale_x
+            x1 * scale_x,
         )
     )
 
     y1 = int(
         max(
             0,
-            y1 * scale_y
+            y1 * scale_y,
         )
     )
 
     x2 = int(
         min(
             image_width,
-            x2 * scale_x
+            x2 * scale_x,
         )
     )
 
     y2 = int(
         min(
             image_height,
-            y2 * scale_y
+            y2 * scale_y,
         )
     )
 
@@ -810,14 +807,14 @@ def bbox_from_cam(
             0,
             0,
             image_width,
-            image_height
+            image_height,
         ]
 
     return [
         x1,
         y1,
         x2 - x1,
-        y2 - y1
+        y2 - y1,
     ]
 
 
@@ -827,7 +824,7 @@ def bbox_from_cam(
 
 def generate_automatic_crop(
     model,
-    image
+    image,
 ):
 
     full_tensor = transform(
@@ -840,12 +837,12 @@ def generate_automatic_crop(
 
         logits = model(
             full_tensor,
-            full_tensor
+            full_tensor,
         )
 
         probabilities = torch.softmax(
             logits,
-            dim=1
+            dim=1,
         )[0]
 
     initial_class = int(
@@ -858,18 +855,18 @@ def generate_automatic_crop(
         model,
         full_tensor,
         full_tensor,
-        initial_class
+        initial_class,
     )
 
     bbox = bbox_from_cam(
         cam,
-        image.size
+        image.size,
     )
 
     crop = make_lesion_crop(
         image,
         bbox,
-        margin=0.0
+        margin=0.0,
     )
 
     return crop
@@ -884,64 +881,54 @@ with st.sidebar:
     st.title("🩺 Breast Ultrasound AI")
 
     st.caption(
-        "AI-assisted breast ultrasound research prototype"
+        "AI-assisted medical imaging research project"
     )
 
     st.divider()
 
-    st.subheader("About")
+    st.subheader("About the Project")
 
     st.write(
-        "This project explores dual-view deep learning "
-        "for benign and malignant breast ultrasound "
-        "lesion classification."
-    )
-
-    st.subheader("Model")
-
-    st.write(
-        "Shared Dual EfficientNet-B3"
+        "This application explores deep learning for "
+        "breast ultrasound lesion classification."
     )
 
     st.write(
-        "Classes: Benign / Malignant"
+        "The model uses a dual-view approach, combining "
+        "the complete ultrasound image with a "
+        "lesion-focused representation."
+    )
+
+    st.subheader("Model Classes")
+
+    st.write("🟢 **Benign**")
+    st.write("🔴 **Malignant**")
+
+    st.subheader("How It Works")
+
+    st.write(
+        "The uploaded ultrasound is processed by the "
+        "trained dual-view model. The system produces "
+        "a class prediction and probability distribution."
     )
 
     st.write(
-        "Input: 300 × 300"
+        "Grad-CAM is then used to visualize image regions "
+        "associated with the model's prediction."
     )
 
-    st.write(
-        "Explainability: Grad-CAM"
-    )
-
-    st.subheader("How it works")
+    st.subheader("Explainability")
 
     st.write(
-        "1. Upload or select an ultrasound case."
-    )
-
-    st.write(
-        "2. The model examines the ultrasound image."
-    )
-
-    st.write(
-        "3. A benign/malignant prediction is generated."
-    )
-
-    st.write(
-        "4. Class probabilities are displayed."
-    )
-
-    st.write(
-        "5. Grad-CAM provides a visual explanation."
+        "Grad-CAM provides a visual indication of regions "
+        "that contributed to the selected prediction."
     )
 
     st.divider()
 
-    st.subheader("Developed by")
+    st.subheader("Developed By")
 
-    st.write(
+    st.markdown(
         "**Zara Ashraf**"
     )
 
@@ -952,12 +939,11 @@ with st.sidebar:
     st.divider()
 
     st.caption(
-        "Research & educational use only."
+        "Research & educational prototype."
     )
 
     st.caption(
-        "AI output should not replace qualified "
-        "clinical assessment."
+        "Not intended for clinical diagnosis."
     )
 
 
@@ -969,84 +955,86 @@ st.markdown(
     '<div class="hero-title">'
     'AI-Assisted Breast Ultrasound Analysis'
     '</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 st.markdown(
     '<div class="hero-subtitle">'
-    'Dual-view deep learning for breast lesion classification'
+    'Deep Learning for Benign and Malignant Lesion Classification'
     '</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 st.markdown(
-    '<div class="hero-text">'
-    'A research prototype exploring how artificial intelligence '
-    'can complement medical imaging workflows by combining '
-    'whole-image and lesion-focused ultrasound information '
-    'with visual explanation through Grad-CAM.'
+    '<div class="hero-description">'
+    'A research prototype exploring dual-view deep learning '
+    'for breast ultrasound analysis, with probability-based '
+    'classification and Grad-CAM visual explainability.'
     '</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
+
+st.write("")
 
 
 # ============================================================
 # DISCLAIMER
 # ============================================================
 
-st.warning(
-    "**Research & Educational Use Only**\n\n"
-    "This application is a research prototype. It is not a "
-    "medical device and should not be used to diagnose disease, "
-    "exclude disease, or guide treatment. AI predictions should "
-    "never replace assessment by a qualified healthcare professional."
-)
+with st.container(border=True):
+
+    st.markdown(
+        "**Research & Educational Prototype**"
+    )
+
+    st.write(
+        "This application is developed for research and "
+        "educational demonstration. It is not a medical device "
+        "and should not be used to diagnose, exclude, or guide "
+        "treatment of breast disease. AI predictions should not "
+        "replace assessment by a qualified healthcare professional."
+    )
 
 
 # ============================================================
-# MODEL OVERVIEW
+# MODEL INFORMATION
 # ============================================================
 
-st.markdown(
-    '<div class="section-title">Model at a Glance</div>',
-    unsafe_allow_html=True
+st.subheader("Model Overview")
+
+st.caption(
+    "The system uses a dual-view architecture to examine "
+    "both global ultrasound appearance and a lesion-focused view."
 )
 
-st.markdown(
-    '<div class="section-text">'
-    'A concise overview of the model used in this research prototype.'
-    '</div>',
-    unsafe_allow_html=True
-)
+info1, info2, info3, info4 = st.columns(4)
 
-c1, c2, c3, c4 = st.columns(4)
-
-with c1:
+with info1:
 
     st.metric(
         "Architecture",
-        "Dual EfficientNet-B3"
+        "Dual EfficientNet-B3",
     )
 
-with c2:
+with info2:
 
     st.metric(
-        "Task",
-        "Benign vs Malignant"
+        "Classification",
+        "Benign / Malignant",
     )
 
-with c3:
+with info3:
 
     st.metric(
-        "Input",
-        f"{IMAGE_SIZE} × {IMAGE_SIZE}"
+        "Input Resolution",
+        "300 × 300",
     )
 
-with c4:
+with info4:
 
     st.metric(
         "Explainability",
-        "Grad-CAM"
+        "Grad-CAM",
     )
 
 
@@ -1054,33 +1042,30 @@ with c4:
 # WHY DEVELOPED
 # ============================================================
 
-st.markdown(
-    '<div class="section-title">'
-    'Why I Developed This Project'
-    '</div>',
-    unsafe_allow_html=True
+st.subheader(
+    "Why was this project developed?"
 )
 
-st.markdown(
-    """
-    As a Medical Imaging Technologist, I developed this project
-    to explore how artificial intelligence can complement medical
-    imaging workflows and make breast ultrasound analysis more
-    transparent.
-
-    Breast ultrasound images can demonstrate considerable variation
-    in lesion appearance, making consistent image-based assessment
-    challenging. This project investigates whether a dual-view deep
-    learning approach can learn from both the overall ultrasound
-    image and a focused lesion representation.
-
-    The goal is not to replace the radiologist or medical imaging
-    professional, but to explore how AI can provide an additional,
-    explainable perspective during image analysis.
-    """
+st.write(
+    "As a Medical Imaging Technologist, I developed this "
+    "project to explore how artificial intelligence can "
+    "complement medical imaging workflows and contribute "
+    "towards more transparent image analysis."
 )
 
-st.divider()
+st.write(
+    "Breast ultrasound can demonstrate substantial variation "
+    "in lesion appearance. This project investigates whether "
+    "a dual-view deep learning model can learn from both the "
+    "overall ultrasound image and a focused lesion representation."
+)
+
+st.write(
+    "The purpose is not to replace radiologists or medical "
+    "imaging professionals. Instead, the project explores AI "
+    "as an assistive research tool that can provide an additional "
+    "image-based perspective together with visual explanation."
+)
 
 
 # ============================================================
@@ -1103,46 +1088,276 @@ except Exception as error:
 
 
 # ============================================================
-# ANALYSIS
+# ANALYSIS AREA
 # ============================================================
 
-st.markdown(
-    '<div class="section-title">'
-    'Explore the Analysis'
-    '</div>',
-    unsafe_allow_html=True
+st.divider()
+
+st.subheader(
+    "Analyze a Breast Ultrasound"
 )
 
-st.markdown(
-    '<div class="section-text">'
-    'Try a representative BUS-BRA case or upload an ultrasound image.'
-    '</div>',
-    unsafe_allow_html=True
+st.caption(
+    "Choose a representative sample or upload an ultrasound "
+    "image to explore the model."
 )
 
-analysis_mode = st.radio(
-    "Choose an option",
+mode = st.radio(
+    "Analysis option",
     [
-        "Sample Cases",
-        "Upload Ultrasound"
+        "Upload Ultrasound",
+        "Explore Sample Cases",
     ],
-    horizontal=True
+    horizontal=True,
 )
 
 
 # ============================================================
-# SAMPLE CASES
+# UPLOAD MODE
 # ============================================================
 
-if analysis_mode == "Sample Cases":
+if mode == "Upload Ultrasound":
 
-    st.subheader(
-        "Representative BUS-BRA Cases"
+    st.write("")
+
+    uploaded_file = st.file_uploader(
+        "Upload a breast ultrasound image",
+        type=[
+            "png",
+            "jpg",
+            "jpeg",
+        ],
+        help=(
+            "Supported formats: PNG, JPG and JPEG. "
+            "Please remove patient-identifying information "
+            "before uploading."
+        ),
     )
 
+    if uploaded_file is None:
+
+        with st.container(border=True):
+
+            st.markdown(
+                "### Upload an ultrasound image"
+            )
+
+            st.write(
+                "Choose a breast ultrasound image to begin "
+                "the AI-assisted research analysis."
+            )
+
+            st.caption(
+                "PNG, JPG and JPEG supported."
+            )
+
+    else:
+
+        image = Image.open(
+            uploaded_file
+        ).convert("RGB")
+
+        width, height = image.size
+
+        preview_col, details_col = st.columns(
+            [2.2, 1]
+        )
+
+        with preview_col:
+
+            st.image(
+                image,
+                caption="Uploaded Ultrasound",
+                use_container_width=True,
+            )
+
+        with details_col:
+
+            st.markdown(
+                "**Image Information**"
+            )
+
+            st.write(
+                f"Width: **{width}px**"
+            )
+
+            st.write(
+                f"Height: **{height}px**"
+            )
+
+            st.write(
+                "Format: **Ultrasound image**"
+            )
+
+            st.info(
+                "For research demonstration only."
+            )
+
+        st.write("")
+
+        analyze = st.button(
+            "🔍 Analyze Ultrasound",
+            type="primary",
+            use_container_width=True,
+        )
+
+        if analyze:
+
+            try:
+
+                with st.spinner(
+                    "Analyzing ultrasound..."
+                ):
+
+                    crop_image = (
+                        generate_automatic_crop(
+                            model,
+                            image,
+                        )
+                    )
+
+                    (
+                        prediction,
+                        benign_probability,
+                        malignant_probability,
+                        full_tensor,
+                        crop_tensor,
+                    ) = predict(
+                        model,
+                        image,
+                        crop_image,
+                    )
+
+                    predicted_class = (
+                        1
+                        if prediction == "Malignant"
+                        else 0
+                    )
+
+                    cam = generate_gradcam(
+                        model,
+                        full_tensor,
+                        crop_tensor,
+                        predicted_class,
+                    )
+
+                    gradcam_image = (
+                        create_gradcam_overlay(
+                            image,
+                            cam,
+                        )
+                    )
+
+                st.divider()
+
+                st.subheader(
+                    "AI Assessment"
+                )
+
+                if prediction == "Benign":
+
+                    st.success(
+                        "Model prediction: **BENIGN**"
+                    )
+
+                else:
+
+                    st.error(
+                        "Model prediction: **MALIGNANT**"
+                    )
+
+                st.write("")
+
+                prob1, prob2 = st.columns(2)
+
+                with prob1:
+
+                    st.metric(
+                        "Benign",
+                        f"{benign_probability * 100:.1f}%",
+                    )
+
+                    st.progress(
+                        benign_probability
+                    )
+
+                with prob2:
+
+                    st.metric(
+                        "Malignant",
+                        f"{malignant_probability * 100:.1f}%",
+                    )
+
+                    st.progress(
+                        malignant_probability
+                    )
+
+                st.caption(
+                    f"Decision threshold: {THRESHOLD:.2f}"
+                )
+
+                st.subheader(
+                    "Visual Explanation"
+                )
+
+                st.caption(
+                    "The visualizations below show the original "
+                    "image, the automatically generated lesion-focused "
+                    "view, and Grad-CAM model attention."
+                )
+
+                visual1, visual2, visual3 = st.columns(3)
+
+                with visual1:
+
+                    st.image(
+                        image,
+                        caption="Original Ultrasound",
+                        use_container_width=True,
+                    )
+
+                with visual2:
+
+                    st.image(
+                        crop_image,
+                        caption="AI-Generated Lesion View",
+                        use_container_width=True,
+                    )
+
+                with visual3:
+
+                    st.image(
+                        gradcam_image,
+                        caption="Grad-CAM Attention",
+                        use_container_width=True,
+                    )
+
+                st.info(
+                    "For uploaded images, the lesion-focused view "
+                    "is generated automatically from model attention. "
+                    "It is not a definitive lesion segmentation."
+                )
+
+            except Exception as error:
+
+                st.error(
+                    "Prediction failed."
+                )
+
+                st.exception(error)
+
+
+# ============================================================
+# SAMPLE CASE MODE
+# ============================================================
+
+else:
+
+    st.write("")
+
     st.caption(
-        "Select a case to explore its reference annotation, "
-        "model prediction and Grad-CAM visualization."
+        "These representative BUS-BRA cases include reference "
+        "lesion annotations for visual comparison."
     )
 
     sample_names = list(
@@ -1155,67 +1370,30 @@ if analysis_mode == "Sample Cases":
             sample_names[0]
         )
 
-    sample_cols = st.columns(4)
+    sample_selector = st.selectbox(
+        "Select a sample case",
+        sample_names,
+        index=sample_names.index(
+            st.session_state.selected_sample
+        ),
+    )
 
-    for index, sample_name in enumerate(
-        sample_names
-    ):
-
-        sample = SAMPLES[
-            sample_name
-        ]
-
-        image_path = os.path.join(
-            BASE_DIR,
-            sample["image"]
-        )
-
-        with sample_cols[index]:
-
-            if os.path.exists(
-                image_path
-            ):
-
-                preview = Image.open(
-                    image_path
-                ).convert("RGB")
-
-                st.image(
-                    preview,
-                    use_container_width=True
-                )
-
-            st.caption(
-                f"**{sample_name}**  \n"
-                f"{sample['id']}"
-            )
-
-            if st.button(
-                "Explore",
-                key=f"sample_{index}",
-                use_container_width=True
-            ):
-
-                st.session_state.selected_sample = (
-                    sample_name
-                )
-
-    selected_sample = (
-        st.session_state.selected_sample
+    st.session_state.selected_sample = (
+        sample_selector
     )
 
     sample = SAMPLES[
-        selected_sample
+        sample_selector
     ]
 
     image_path = os.path.join(
         BASE_DIR,
-        sample["image"]
+        sample["image"],
     )
 
     mask_path = os.path.join(
         BASE_DIR,
-        sample["mask"]
+        sample["mask"],
     )
 
     if not os.path.exists(
@@ -1244,7 +1422,7 @@ if analysis_mode == "Sample Cases":
 
     crop_image = make_lesion_crop(
         image,
-        sample["bbox"]
+        sample["bbox"],
     )
 
     try:
@@ -1254,11 +1432,11 @@ if analysis_mode == "Sample Cases":
             benign_probability,
             malignant_probability,
             full_tensor,
-            crop_tensor
+            crop_tensor,
         ) = predict(
             model,
             image,
-            crop_image
+            crop_image,
         )
 
         predicted_class = (
@@ -1271,12 +1449,12 @@ if analysis_mode == "Sample Cases":
             model,
             full_tensor,
             crop_tensor,
-            predicted_class
+            predicted_class,
         )
 
         gradcam_image = create_gradcam_overlay(
             image,
-            cam
+            cam,
         )
 
     except Exception as error:
@@ -1294,34 +1472,34 @@ if analysis_mode == "Sample Cases":
     # --------------------------------------------------------
 
     st.subheader(
-        "Selected Case"
+        "Case Information"
     )
 
-    i1, i2, i3 = st.columns(3)
+    case1, case2, case3 = st.columns(3)
 
-    with i1:
+    with case1:
 
         st.metric(
             "Case ID",
-            sample["id"]
+            sample["id"],
         )
 
-    with i2:
+    with case2:
 
         st.metric(
             "Reference Class",
-            sample["label"]
+            sample["label"],
         )
 
-    with i3:
+    with case3:
 
         st.metric(
             "Histology",
-            sample["histology"]
+            sample["histology"],
         )
 
     # --------------------------------------------------------
-    # AI ASSESSMENT
+    # PREDICTION
     # --------------------------------------------------------
 
     st.subheader(
@@ -1331,33 +1509,33 @@ if analysis_mode == "Sample Cases":
     if prediction == "Benign":
 
         st.success(
-            f"Model prediction: **{prediction}**"
+            "Model prediction: **BENIGN**"
         )
 
     else:
 
         st.error(
-            f"Model prediction: **{prediction}**"
+            "Model prediction: **MALIGNANT**"
         )
 
-    p1, p2 = st.columns(2)
+    prob1, prob2 = st.columns(2)
 
-    with p1:
+    with prob1:
 
-        st.write(
-            f"**Benign probability: "
-            f"{benign_probability * 100:.1f}%**"
+        st.metric(
+            "Benign Probability",
+            f"{benign_probability * 100:.1f}%",
         )
 
         st.progress(
             benign_probability
         )
 
-    with p2:
+    with prob2:
 
-        st.write(
-            f"**Malignant probability: "
-            f"{malignant_probability * 100:.1f}%**"
+        st.metric(
+            "Malignant Probability",
+            f"{malignant_probability * 100:.1f}%",
         )
 
         st.progress(
@@ -1373,33 +1551,33 @@ if analysis_mode == "Sample Cases":
     )
 
     st.caption(
-        "Grad-CAM indicates regions associated with "
-        "the model's selected prediction."
+        "Compare the original ultrasound, reference lesion "
+        "annotation and the model's Grad-CAM attention."
     )
 
-    v1, v2, v3 = st.columns(3)
+    visual1, visual2, visual3 = st.columns(3)
 
-    with v1:
+    with visual1:
 
         st.image(
             image,
             caption="Original Ultrasound",
-            use_container_width=True
+            use_container_width=True,
         )
 
-    with v2:
+    with visual2:
 
         if mask is not None:
 
             mask_overlay = create_mask_overlay(
                 image,
-                mask
+                mask,
             )
 
             st.image(
                 mask_overlay,
                 caption="Reference Lesion Mask",
-                use_container_width=True
+                use_container_width=True,
             )
 
         else:
@@ -1407,216 +1585,22 @@ if analysis_mode == "Sample Cases":
             st.image(
                 image,
                 caption="Original Ultrasound",
-                use_container_width=True
+                use_container_width=True,
             )
 
-    with v3:
+    with visual3:
 
         st.image(
             gradcam_image,
             caption="Grad-CAM Attention",
-            use_container_width=True
+            use_container_width=True,
         )
 
     st.info(
-        "The lesion-focused view used by the dual-view model "
-        "is generated from the reference BUS-BRA bounding box "
-        "for these representative cases."
+        "For these representative BUS-BRA cases, the lesion-focused "
+        "view is generated using the reference bounding box available "
+        "with the sample case."
     )
-
-
-# ============================================================
-# UPLOAD
-# ============================================================
-
-else:
-
-    st.subheader(
-        "Upload Your Ultrasound"
-    )
-
-    st.caption(
-        "Upload a breast ultrasound image for a research "
-        "demonstration of prediction, probabilities and Grad-CAM."
-    )
-
-    uploaded_file = st.file_uploader(
-        "Choose an ultrasound image",
-        type=[
-            "png",
-            "jpg",
-            "jpeg"
-        ],
-        help=(
-            "PNG, JPG and JPEG are supported. "
-            "Do not upload patient-identifying information."
-        )
-    )
-
-    if uploaded_file is None:
-
-        st.info(
-            "Please upload a breast ultrasound image to begin."
-        )
-
-    else:
-
-        image = Image.open(
-            uploaded_file
-        ).convert("RGB")
-
-        width, height = image.size
-
-        st.image(
-            image,
-            caption="Uploaded Ultrasound",
-            width=600
-        )
-
-        st.caption(
-            f"Image dimensions: {width} × {height} pixels"
-        )
-
-        if st.button(
-            "🔍 Analyze Ultrasound",
-            type="primary",
-            use_container_width=True
-        ):
-
-            try:
-
-                with st.spinner(
-                    "Analyzing ultrasound..."
-                ):
-
-                    crop_image = (
-                        generate_automatic_crop(
-                            model,
-                            image
-                        )
-                    )
-
-                    (
-                        prediction,
-                        benign_probability,
-                        malignant_probability,
-                        full_tensor,
-                        crop_tensor
-                    ) = predict(
-                        model,
-                        image,
-                        crop_image
-                    )
-
-                    predicted_class = (
-                        1
-                        if prediction == "Malignant"
-                        else 0
-                    )
-
-                    cam = generate_gradcam(
-                        model,
-                        full_tensor,
-                        crop_tensor,
-                        predicted_class
-                    )
-
-                    gradcam_image = (
-                        create_gradcam_overlay(
-                            image,
-                            cam
-                        )
-                    )
-
-                st.subheader(
-                    "AI Assessment"
-                )
-
-                if prediction == "Benign":
-
-                    st.success(
-                        f"Model prediction: **{prediction}**"
-                    )
-
-                else:
-
-                    st.error(
-                        f"Model prediction: **{prediction}**"
-                    )
-
-                p1, p2 = st.columns(2)
-
-                with p1:
-
-                    st.write(
-                        f"**Benign probability: "
-                        f"{benign_probability * 100:.1f}%**"
-                    )
-
-                    st.progress(
-                        benign_probability
-                    )
-
-                with p2:
-
-                    st.write(
-                        f"**Malignant probability: "
-                        f"{malignant_probability * 100:.1f}%**"
-                    )
-
-                    st.progress(
-                        malignant_probability
-                    )
-
-                st.subheader(
-                    "Visual Explanation"
-                )
-
-                st.caption(
-                    "The lesion-focused view is generated automatically "
-                    "using model attention."
-                )
-
-                v1, v2, v3 = st.columns(3)
-
-                with v1:
-
-                    st.image(
-                        image,
-                        caption="Uploaded Ultrasound",
-                        use_container_width=True
-                    )
-
-                with v2:
-
-                    st.image(
-                        crop_image,
-                        caption="AI-Generated Lesion View",
-                        use_container_width=True
-                    )
-
-                with v3:
-
-                    st.image(
-                        gradcam_image,
-                        caption="Grad-CAM Attention",
-                        use_container_width=True
-                    )
-
-                st.info(
-                    "Uploaded images do not include ground-truth lesion "
-                    "annotations. The AI-generated crop and Grad-CAM "
-                    "visualization should therefore be interpreted as "
-                    "model attention, not definitive lesion segmentation."
-                )
-
-            except Exception as error:
-
-                st.error(
-                    "Prediction failed."
-                )
-
-                st.exception(error)
 
 
 # ============================================================
@@ -1629,9 +1613,9 @@ with st.expander(
     "Technical Model Information"
 ):
 
-    c1, c2 = st.columns(2)
+    technical1, technical2 = st.columns(2)
 
-    with c1:
+    with technical1:
 
         st.write(
             "**Architecture:** "
@@ -1639,8 +1623,13 @@ with st.expander(
         )
 
         st.write(
-            "**Classification:** "
-            "Benign vs Malignant"
+            "**Task:** "
+            "Binary breast lesion classification"
+        )
+
+        st.write(
+            "**Classes:** "
+            "Benign and Malignant"
         )
 
         st.write(
@@ -1648,12 +1637,12 @@ with st.expander(
             f"{IMAGE_SIZE} × {IMAGE_SIZE}"
         )
 
+    with technical2:
+
         st.write(
             f"**Decision threshold:** "
             f"{THRESHOLD}"
         )
-
-    with c2:
 
         st.write(
             f"**Inference device:** "
@@ -1665,13 +1654,7 @@ with st.expander(
         )
 
         st.write(
-            "**Sample localization:** "
-            "BUS-BRA BBOX"
-        )
-
-        st.write(
-            "**Upload localization:** "
-            "AI-generated attention crop"
+            "**Model input:** Full image + lesion-focused view"
         )
 
 
@@ -1680,11 +1663,13 @@ with st.expander(
 # ============================================================
 
 st.markdown(
-    '<div class="footer-text">'
-    '<b>AI-Assisted Breast Ultrasound Analysis</b><br>'
-    'Breast Ultrasound Research Prototype<br><br>'
-    'Developed by <b>Zara Ashraf</b><br>'
-    'BS Medical Imaging Technology'
-    '</div>',
-    unsafe_allow_html=True
+    """
+    <div class="footer">
+        <b>AI-Assisted Breast Ultrasound Analysis</b><br>
+        Breast Ultrasound Research Prototype<br><br>
+        Developed by <b>Zara Ashraf</b><br>
+        BS Medical Imaging Technology
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
