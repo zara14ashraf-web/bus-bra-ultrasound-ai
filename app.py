@@ -1396,7 +1396,7 @@ else:
 
     st.caption(
         "Explore representative BUS-BRA cases and compare "
-        "AI predictions with reference information."
+        "the model prediction with the reference result."
     )
 
     # --------------------------------------------------------
@@ -1455,58 +1455,16 @@ else:
         ).convert("L")
 
     # --------------------------------------------------------
-    # CASE INFORMATION
+    # SAMPLE IMAGE
     # --------------------------------------------------------
 
     st.write("")
 
-    st.markdown("#### Case Information")
-
-    case_col1, case_col2, case_col3 = st.columns(3)
-
-    with case_col1:
-
-        st.caption("CASE ID")
-
-        st.markdown(
-            f"**{sample.get('case_id', sample_selector)}**"
-        )
-
-    with case_col2:
-
-        st.caption("REFERENCE CLASS")
-
-        st.markdown(
-            f"**{sample.get('pathology', 'Not available')}**"
-        )
-
-    with case_col3:
-
-        st.caption("HISTOLOGY")
-
-        st.markdown(
-            f"**{sample.get('histology', 'Not available')}**"
-        )
-
-    # --------------------------------------------------------
-    # IMAGE DISPLAY
-    # --------------------------------------------------------
-
-    st.write("")
-
-    image_col1, image_col2 = st.columns(
-        2,
-        gap="large",
+    st.image(
+        image,
+        caption=f"Sample Case · {sample_selector}",
+        use_container_width=True,
     )
-
-    with image_col1:
-
-        st.image(
-            image,
-            caption="Original Ultrasound",
-            use_container_width=True,
-        )
-
     # --------------------------------------------------------
     # LESION-FOCUSED VIEW
     # --------------------------------------------------------
