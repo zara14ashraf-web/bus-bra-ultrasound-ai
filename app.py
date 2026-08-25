@@ -1395,8 +1395,8 @@ else:
     st.write("")
 
     st.caption(
-        "These representative BUS-BRA cases include reference "
-        "lesion annotations for visual comparison."
+        "Explore representative BUS-BRA cases and compare "
+        "the model prediction with the reference information."
     )
 
     sample_names = list(
@@ -1459,10 +1459,18 @@ else:
             mask_path
         ).convert("L")
 
+    # --------------------------------------------------------
+    # LESION-FOCUSED VIEW
+    # --------------------------------------------------------
+
     crop_image = make_lesion_crop(
         image,
         sample["bbox"],
     )
+
+    # --------------------------------------------------------
+    # MODEL ANALYSIS
+    # --------------------------------------------------------
 
     try:
 
@@ -1505,7 +1513,6 @@ else:
         st.exception(error)
 
         st.stop()
-
     # --------------------------------------------------------
     # CASE INFORMATION
     # --------------------------------------------------------
