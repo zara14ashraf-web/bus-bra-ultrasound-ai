@@ -1396,18 +1396,17 @@ else:
 
     st.caption(
         "Explore representative BUS-BRA cases and compare "
-        "the model prediction with the reference information."
+        "AI predictions with reference information."
     )
 
-    sample_names = list(
-        SAMPLES.keys()
-    )
+    # --------------------------------------------------------
+    # SAMPLE CASE SELECTION
+    # --------------------------------------------------------
+
+    sample_names = list(SAMPLES.keys())
 
     if "selected_sample" not in st.session_state:
-
-        st.session_state.selected_sample = (
-            sample_names[0]
-        )
+        st.session_state.selected_sample = sample_names[0]
 
     sample_selector = st.selectbox(
         "Select a sample case",
@@ -1417,13 +1416,13 @@ else:
         ),
     )
 
-    st.session_state.selected_sample = (
-        sample_selector
-    )
+    st.session_state.selected_sample = sample_selector
 
-    sample = SAMPLES[
-        sample_selector
-    ]
+    sample = SAMPLES[sample_selector]
+
+    # --------------------------------------------------------
+    # LOAD SAMPLE IMAGE
+    # --------------------------------------------------------
 
     image_path = os.path.join(
         BASE_DIR,
@@ -1435,9 +1434,7 @@ else:
         sample["mask"],
     )
 
-    if not os.path.exists(
-        image_path
-    ):
+    if not os.path.exists(image_path):
 
         st.error(
             f"Sample image not found: {sample['image']}"
@@ -1451,14 +1448,267 @@ else:
 
     mask = None
 
-    if os.path.exists(
-        mask_path
-    ):
+    if os.path.exists(mask_path):
 
         mask = Image.open(
             mask_path
         ).convert("L")
 
+    # --------------------------------------------------------
+    # CASE INFORMATION
+    # --------------------------------------------------------
+
+    st.write("")
+
+    st.markdown("#### Case Information")
+
+    case_col1, case_col2, case_col3 = st.columns(3)
+
+    with case_col1:
+
+        st.caption("CASE ID")
+
+        st.markdown(
+            f"**{sample.get('case_id', sample_selector)}**"
+        )
+
+    with case_col2:
+
+        st.caption("REFERENCE CLASS")
+
+        st.markdown(
+            f"**{sample.get('pathology', 'Not available')}**"
+        )
+
+    with case_col3:
+
+        st.caption("HISTOLOGY")
+
+        st.markdown(
+            f"**{sample.get('histology', 'Not available')}**"
+        )
+
+    # --------------------------------------------------------
+    # IMAGE DISPLAY
+    # --------------------------------------------------------
+
+    st.write("")
+
+    image_col1, image_col2 = st.columns(
+        2,
+        gap="large",
+    )
+
+    with image_col1:
+
+        st.image(
+            image,
+            caption="Original Ultrasound",
+            use_container_width=True,
+        )
+
+    # --------------------------------------------------------
+    # LESION-FOCUSED VIEW
+    # --------------------------------------------------------
+
+    crop_image = make_lesion_crop(
+        image,
+        sample["bbox"],
+    )
+
+    with image_col2:
+
+        st.image(
+            crop_image,
+            caption="Lesion-Focused View",
+            use_container_width=True,
+        )
+
+    # --------------------------------------------------------
+    # MODEL ANALYSIS
+    # --------------------------------------------------------
+
+    try:
+
+        (
+            prediction,
+            benign_probability,
+            malignant_probability,
+            full_tensor,
+            crop_tensor,
+        ) = predict(
+            model,
+            image,
+            crop_image,
+        )
+
+        predicted_class = (
+            1
+            if prediction == "Malignant"
+            else 0
+        )
+
+        cam = generate_gradcam(
+            model,
+            full_tensor,
+            crop_tensor,
+            predicted_class,
+        )
+
+        gradcam_image = create_gradcam_overlay(
+            image,
+            cam,
+        )
+
+    except Exception as error:
+
+        st.error(
+            "Sample analysis failed."
+        )
+
+        st.exception(error)
+
+        st.stop()
+
+    # --------------------------------------------------------
+    # AI ASSESSMENT
+    # --------------------------------------------------------
+
+    st.divider()
+
+    st.subheader("AI Assessment")
+
+    if prediction == "Benign":
+
+        st.success(
+            "Model prediction: **BENIGN**"
+        )
+
+    else:
+
+        st.error(
+            "Model prediction: **MALIGNANT**"
+        )
+
+    st.write("")
+
+    prob1, prob2 = st.columns(
+        2,
+        gap="large",
+    )
+
+    with prob1:
+
+        st.metric(
+            "Benign Probability",
+            f"{benign_probability * 100:.1f}%",
+        )
+
+        st.progress(
+            benign_probability
+        )
+
+    with prob2:
+
+        st.metric(
+            "Malignant Probability",
+            f"{malignant_probability * 100:.1f}%",
+        )
+
+        st.progress(
+            malignant_probability
+        )
+
+    st.caption(
+        f"Decision threshold: {THRESHOLD:.2f}"
+    )
+
+    # --------------------------------------------------------
+    # REFERENCE INFORMATION
+    # --------------------------------------------------------
+
+    st.write("")
+
+    st.markdown("#### Reference Information")
+
+    ref_col1, ref_col2 = st.columns(2)
+
+    with ref_col1:
+
+        st.caption("REFERENCE CLASS")
+
+        st.markdown(
+            f"**{sample.get('pathology', 'Not available')}**"
+        )
+
+    with ref_col2:
+
+        st.caption("HISTOLOGY")
+
+        st.markdown(
+            f"**{sample.get('histology', 'Not available')}**"
+        )
+
+    # --------------------------------------------------------
+    # DISCLAIMER
+    # --------------------------------------------------------
+
+    st.info(
+        "**Research & Educational Use Only**  \n"
+        "Reference information is provided for dataset "
+        "demonstration and comparison. AI predictions are "
+        "not a clinical diagnosis and should not replace "
+        "assessment by a qualified healthcare professional."
+    )
+
+    # --------------------------------------------------------
+    # VISUAL EXPLANATION
+    # --------------------------------------------------------
+
+    st.write("")
+
+    st.subheader("Visual Explanation")
+
+    st.caption(
+        "Grad-CAM highlights image regions that contributed "
+        "to the selected model prediction."
+    )
+
+    visual1, visual2, visual3 = st.columns(
+        3,
+        gap="medium",
+    )
+
+    with visual1:
+
+        st.image(
+            image,
+            caption="Original Ultrasound",
+            use_container_width=True,
+        )
+
+    with visual2:
+
+        st.image(
+            crop_image,
+            caption="Lesion-Focused View",
+            use_container_width=True,
+        )
+
+    with visual3:
+
+        st.image(
+            gradcam_image,
+            caption="Grad-CAM Attention",
+            use_container_width=True,
+        )
+
+    st.caption(
+        "The lesion-focused view is based on the reference "
+        "lesion region available for this representative "
+        "dataset case. Grad-CAM represents model attention "
+        "and is not a definitive lesion segmentation."
+    )
     # --------------------------------------------------------
     # LESION-FOCUSED VIEW
     # --------------------------------------------------------
