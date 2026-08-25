@@ -698,7 +698,149 @@ def predict(
         full_tensor,
         crop_tensor,
     )
+# ============================================================
+# CONFIDENCE-AWARE AI ASSESSMENT
+# ============================================================
 
+def display_ai_assessment(
+    prediction,
+    benign_probability,
+    malignant_probability,
+):
+    """
+    Display the model prediction together with
+    probability distribution and confidence interpretation.
+    """
+
+    confidence = max(
+        benign_probability,
+        malignant_probability,
+    )
+
+    # --------------------------------------------------------
+    # CONFIDENCE LEVEL
+    # --------------------------------------------------------
+
+    if confidence >= 0.80:
+
+        confidence_level = "High confidence"
+
+        confidence_message = (
+            "The model shows strong probability separation "
+            "between the two classes for this image."
+        )
+
+    elif confidence >= 0.65:
+
+        confidence_level = "Moderate confidence"
+
+        confidence_message = (
+            "The model shows moderate probability separation "
+            "between the two classes for this image."
+        )
+
+    else:
+
+        confidence_level = "Low confidence"
+
+        confidence_message = (
+            "The model shows limited separation between the "
+            "two classes for this image. The prediction should "
+            "be interpreted cautiously."
+        )
+
+    # --------------------------------------------------------
+    # PREDICTION
+    # --------------------------------------------------------
+
+    if prediction == "Benign":
+
+        st.success(
+            "### Model Prediction: BENIGN"
+        )
+
+    else:
+
+        st.error(
+            "### Model Prediction: MALIGNANT"
+        )
+
+    # --------------------------------------------------------
+    # CONFIDENCE
+    # --------------------------------------------------------
+
+    confidence_col1, confidence_col2 = st.columns(
+        [1, 2],
+        gap="medium",
+    )
+
+    with confidence_col1:
+
+        st.metric(
+            "Prediction Confidence",
+            f"{confidence * 100:.1f}%",
+        )
+
+    with confidence_col2:
+
+        if confidence_level == "High confidence":
+
+            st.success(
+                f"**{confidence_level}**"
+            )
+
+        elif confidence_level == "Moderate confidence":
+
+            st.warning(
+                f"**{confidence_level}**"
+            )
+
+        else:
+
+            st.warning(
+                f"**{confidence_level}**"
+            )
+
+    st.caption(
+        confidence_message
+    )
+
+    st.write("")
+
+    # --------------------------------------------------------
+    # PROBABILITIES
+    # --------------------------------------------------------
+
+    prob1, prob2 = st.columns(
+        2,
+        gap="large",
+    )
+
+    with prob1:
+
+        st.metric(
+            "Benign",
+            f"{benign_probability * 100:.1f}%",
+        )
+
+        st.progress(
+            benign_probability
+        )
+
+    with prob2:
+
+        st.metric(
+            "Malignant",
+            f"{malignant_probability * 100:.1f}%",
+        )
+
+        st.progress(
+            malignant_probability
+        )
+
+    st.caption(
+        f"Decision threshold: {THRESHOLD:.2f}"
+    )
 
 # ============================================================
 # BBOX FROM CAM
@@ -1336,64 +1478,21 @@ if mode == "Upload Ultrasound":
                         )
                     )
 
-                # =================================================
-                # AI ASSESSMENT
-                # =================================================
+               # =================================================
+# AI ASSESSMENT
+# =================================================
 
-                st.divider()
+st.divider()
 
-                st.subheader(
-                    "AI Assessment"
-                )
+st.subheader(
+    "AI Assessment"
+)
 
-                if prediction == "Benign":
-
-                    st.success(
-                        "Model prediction: **BENIGN**"
-                    )
-
-                else:
-
-                    st.error(
-                        "Model prediction: **MALIGNANT**"
-                    )
-
-                st.write("")
-
-                # ---------------------------------------------
-                # PROBABILITIES
-                # ---------------------------------------------
-
-                prob1, prob2 = st.columns(
-                    2,
-                    gap="large",
-                )
-
-                with prob1:
-
-                    st.metric(
-                        "Benign",
-                        f"{benign_probability * 100:.1f}%",
-                    )
-
-                    st.progress(
-                        benign_probability
-                    )
-
-                with prob2:
-
-                    st.metric(
-                        "Malignant",
-                        f"{malignant_probability * 100:.1f}%",
-                    )
-
-                    st.progress(
-                        malignant_probability
-                    )
-
-                st.caption(
-                    f"Decision threshold: {THRESHOLD:.2f}"
-                )
+display_ai_assessment(
+    prediction,
+    benign_probability,
+    malignant_probability,
+)
 
                 # =================================================
                 # VISUAL EXPLANATION
