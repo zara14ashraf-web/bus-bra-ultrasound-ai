@@ -1153,11 +1153,7 @@ if mode == "Upload Ultrasound":
 
     uploaded_file = st.file_uploader(
         "Upload a breast ultrasound image",
-        type=[
-            "png",
-            "jpg",
-            "jpeg",
-        ],
+        type=["png", "jpg", "jpeg"],
         help=(
             "Supported formats: PNG, JPG and JPEG. "
             "Please remove patient-identifying information "
@@ -1167,20 +1163,18 @@ if mode == "Upload Ultrasound":
 
     if uploaded_file is None:
 
-        with st.container(border=True):
+        st.write("")
 
-            st.markdown(
-                "### Upload an ultrasound image"
-            )
+        st.markdown("#### Upload an ultrasound image")
 
-            st.write(
-                "Choose a breast ultrasound image to begin "
-                "the AI-assisted research analysis."
-            )
+        st.caption(
+            "Choose a breast ultrasound image to begin the "
+            "AI-assisted research analysis."
+        )
 
-            st.caption(
-                "PNG, JPG and JPEG supported."
-            )
+        st.caption(
+            "Supported formats: PNG, JPG and JPEG"
+        )
 
     else:
 
@@ -1190,8 +1184,15 @@ if mode == "Upload Ultrasound":
 
         width, height = image.size
 
-        preview_col, details_col = st.columns(
-            [2.2, 1]
+        st.write("")
+
+        # ----------------------------------------------------
+        # IMAGE PREVIEW
+        # ----------------------------------------------------
+
+        preview_col, info_col = st.columns(
+            [2.4, 1],
+            gap="large",
         )
 
         with preview_col:
@@ -1202,29 +1203,30 @@ if mode == "Upload Ultrasound":
                 use_container_width=True,
             )
 
-        with details_col:
+        with info_col:
 
-            st.markdown(
-                "**Image Information**"
+            st.markdown("#### Image Information")
+
+            st.write(
+                f"**Dimensions**  \n"
+                f"{width} × {height} px"
             )
 
             st.write(
-                f"Width: **{width}px**"
+                "**Format**  \n"
+                "Ultrasound image"
             )
 
-            st.write(
-                f"Height: **{height}px**"
-            )
-
-            st.write(
-                "Format: **Ultrasound image**"
-            )
-
-            st.info(
-                "For research demonstration only."
+            st.caption(
+                "Patient-identifying information should be "
+                "removed before uploading."
             )
 
         st.write("")
+
+        # ----------------------------------------------------
+        # ANALYZE BUTTON
+        # ----------------------------------------------------
 
         analyze = st.button(
             "🔍 Analyze Ultrasound",
@@ -1279,6 +1281,10 @@ if mode == "Upload Ultrasound":
                         )
                     )
 
+                # ------------------------------------------------
+                # AI ASSESSMENT
+                # ------------------------------------------------
+
                 st.divider()
 
                 st.subheader(
@@ -1299,12 +1305,19 @@ if mode == "Upload Ultrasound":
 
                 st.write("")
 
-                prob1, prob2 = st.columns(2)
+                # ------------------------------------------------
+                # PROBABILITIES
+                # ------------------------------------------------
+
+                prob1, prob2 = st.columns(
+                    2,
+                    gap="large",
+                )
 
                 with prob1:
 
                     st.metric(
-                        "Benign",
+                        "Benign Probability",
                         f"{benign_probability * 100:.1f}%",
                     )
 
@@ -1315,7 +1328,7 @@ if mode == "Upload Ultrasound":
                 with prob2:
 
                     st.metric(
-                        "Malignant",
+                        "Malignant Probability",
                         f"{malignant_probability * 100:.1f}%",
                     )
 
@@ -1327,17 +1340,27 @@ if mode == "Upload Ultrasound":
                     f"Decision threshold: {THRESHOLD:.2f}"
                 )
 
+                # ------------------------------------------------
+                # VISUAL EXPLANATION
+                # ------------------------------------------------
+
+                st.write("")
+
                 st.subheader(
                     "Visual Explanation"
                 )
 
                 st.caption(
-                    "The visualizations below show the original "
-                    "image, the automatically generated lesion-focused "
-                    "view, and Grad-CAM model attention."
+                    "The following views illustrate the original "
+                    "ultrasound, the automatically generated "
+                    "lesion-focused representation, and the regions "
+                    "highlighted by Grad-CAM."
                 )
 
-                visual1, visual2, visual3 = st.columns(3)
+                visual1, visual2, visual3 = st.columns(
+                    3,
+                    gap="medium",
+                )
 
                 with visual1:
 
@@ -1364,9 +1387,9 @@ if mode == "Upload Ultrasound":
                     )
 
                 st.info(
-                    "For uploaded images, the lesion-focused view "
-                    "is generated automatically from model attention. "
-                    "It is not a definitive lesion segmentation."
+                    "The lesion-focused view is generated automatically "
+                    "for the uploaded image. It is not a definitive "
+                    "lesion segmentation."
                 )
 
             except Exception as error:
