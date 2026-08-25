@@ -25,14 +25,16 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM UI
+# CUSTOM STYLING
 # ============================================================
 
 st.markdown(
     """
     <style>
 
-    /* ---------- GLOBAL ---------- */
+    /* =========================
+       MAIN PAGE
+       ========================= */
 
     .block-container {
         max-width: 1180px;
@@ -40,60 +42,64 @@ st.markdown(
         padding-bottom: 3rem;
     }
 
-    .main {
-        background-color: #ffffff;
+    /* =========================
+       HERO
+       ========================= */
+
+    .hero {
+        text-align: center;
+        padding: 1.5rem 1rem 1.2rem 1rem;
     }
 
-    /* ---------- HERO ---------- */
+    .hero-title {
+        font-size: 2.7rem;
+        font-weight: 700;
+        color: #123b4a;
+        letter-spacing: -1px;
+    }
 
-    st.markdown(
-    """
-    <div class="hero">
-        <div class="hero-title">
-            SonoInsight AI
-        </div>
+    .hero-subtitle {
+        font-size: 1.15rem;
+        color: #55717c;
+        margin-top: 0.2rem;
+    }
 
-        <div class="hero-subtitle">
-            AI-Assisted Breast Ultrasound Analysis
-        </div>
+    .hero-description {
+        max-width: 760px;
+        margin: 0.8rem auto 0 auto;
+        color: #64748b;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
 
-        <div class="hero-description">
-            A research prototype exploring dual-view deep learning
-            for benign and malignant breast ultrasound classification,
-            supported by visual explainability through Grad-CAM.
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-    
+    /* =========================
+       DISCLAIMER
+       ========================= */
 
-    /* ---------- DISCLAIMER ---------- */
+    .disclaimer {
+        background-color: #f8fafc;
+        border: 1px solid #dbe4ea;
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin: 0.5rem 0 1.7rem 0;
+        color: #475569;
+        font-size: 0.85rem;
+        line-height: 1.55;
+    }
 
-    st.markdown(
-    """
-    <div class="disclaimer">
+    .disclaimer strong {
+        color: #183f4d;
+    }
 
-        <strong>Research & Educational Prototype</strong><br>
-
-        SonoInsight AI is developed for research and educational
-        demonstration only. It is not a medical device and should
-        not be used to diagnose, exclude, or guide treatment of
-        breast disease. AI predictions should never replace
-        assessment by a qualified healthcare professional.
-
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-    /* ---------- SECTION ---------- */
+    /* =========================
+       SECTION HEADINGS
+       ========================= */
 
     .section-title {
-        font-size: 1.55rem;
+        font-size: 1.5rem;
         font-weight: 650;
         color: #183f4d;
-        margin-top: 1.6rem;
+        margin-top: 1.4rem;
         margin-bottom: 0.2rem;
     }
 
@@ -103,18 +109,20 @@ st.markdown(
         margin-bottom: 1rem;
     }
 
-    /* ---------- INFO CARDS ---------- */
+    /* =========================
+       MODEL INFO CARDS
+       ========================= */
 
     .info-card {
-        background: #f8fafc;
+        background-color: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 16px 18px;
-        min-height: 92px;
+        padding: 15px 17px;
+        min-height: 88px;
     }
 
     .info-label {
-        font-size: 0.76rem;
+        font-size: 0.72rem;
         color: #71808a;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -122,52 +130,42 @@ st.markdown(
     }
 
     .info-value {
-        font-size: 1rem;
+        font-size: 0.98rem;
         font-weight: 650;
         color: #183f4d;
     }
 
-    /* ---------- WHY SECTION ---------- */
+    /* =========================
+       WHY SECTION
+       ========================= */
 
     .why-box {
-        background: #f8fafc;
+        background-color: #f8fafc;
         border-left: 4px solid #2f7181;
         border-radius: 10px;
         padding: 17px 20px;
         color: #475569;
         line-height: 1.65;
-        font-size: 0.92rem;
+        font-size: 0.9rem;
         margin-top: 0.7rem;
     }
 
-    /* ---------- SAMPLE CARDS ---------- */
-
-    .sample-title {
-        font-size: 0.92rem;
-        font-weight: 650;
-        color: #183f4d;
-        margin-top: 0.35rem;
-    }
-
-    .sample-label {
-        font-size: 0.78rem;
-        color: #71808a;
-    }
-
-    /* ---------- RESULT ---------- */
+    /* =========================
+       RESULT
+       ========================= */
 
     .result-card {
-        background: #f8fafc;
+        background-color: #f8fafc;
         border: 1px solid #dbe4ea;
         border-radius: 14px;
-        padding: 22px;
+        padding: 20px;
         text-align: center;
-        margin: 1rem 0 1.2rem 0;
+        margin: 0.8rem 0 1rem 0;
     }
 
     .result-label {
         color: #71808a;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.8px;
     }
@@ -178,64 +176,78 @@ st.markdown(
         margin-top: 4px;
     }
 
+    /* =========================
+       PROBABILITY
+       ========================= */
+
     .probability-card {
-        background: #ffffff;
+        background-color: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 15px 18px;
-        margin-bottom: 10px;
+        padding: 14px 17px;
     }
 
     .probability-name {
-        font-size: 0.86rem;
+        font-size: 0.84rem;
         color: #475569;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
     }
 
     .probability-value {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 700;
         color: #183f4d;
     }
 
-    /* ---------- UPLOAD ---------- */
+    /* =========================
+       SAMPLE
+       ========================= */
 
-    .upload-note {
-        text-align: center;
-        color: #71808a;
-        font-size: 0.82rem;
-        margin-top: -0.4rem;
+    .sample-title {
+        font-size: 0.88rem;
+        font-weight: 650;
+        color: #183f4d;
+        margin-top: 0.3rem;
     }
 
-    /* ---------- SIDEBAR ---------- */
+    .sample-label {
+        font-size: 0.75rem;
+        color: #71808a;
+        margin-bottom: 0.3rem;
+    }
+
+    /* =========================
+       SIDEBAR
+       ========================= */
 
     .sidebar-title {
         font-size: 1.25rem;
         font-weight: 700;
         color: #183f4d;
-        margin-bottom: 0.2rem;
     }
 
     .sidebar-heading {
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         font-weight: 650;
         color: #183f4d;
-        margin-top: 1.1rem;
+        margin-top: 1rem;
         margin-bottom: 0.3rem;
     }
 
     .sidebar-text {
         color: #64748b;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         line-height: 1.55;
     }
 
-    /* ---------- FOOTER ---------- */
+    /* =========================
+       FOOTER
+       ========================= */
 
     .footer {
         text-align: center;
         color: #94a3b8;
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         margin-top: 1.8rem;
     }
 
@@ -404,15 +416,19 @@ def load_model():
     if isinstance(checkpoint, dict):
 
         if "state_dict" in checkpoint:
+
             state_dict = checkpoint["state_dict"]
 
         elif "model_state_dict" in checkpoint:
+
             state_dict = checkpoint["model_state_dict"]
 
         else:
+
             state_dict = checkpoint
 
     else:
+
         state_dict = checkpoint
 
     model.load_state_dict(
@@ -428,7 +444,7 @@ def load_model():
 
 
 # ============================================================
-# TRANSFORM
+# IMAGE TRANSFORM
 # ============================================================
 
 transform = transforms.Compose([
@@ -446,7 +462,7 @@ transform = transforms.Compose([
 
 
 # ============================================================
-# LESION CROP
+# BBOX LESION CROP
 # ============================================================
 
 def make_lesion_crop(
@@ -523,6 +539,7 @@ def create_mask_overlay(
     )
 
     if not mask_binary.any():
+
         return image
 
     overlay = image_array.copy()
@@ -555,11 +572,13 @@ def create_mask_overlay(
         np.uint8
     )
 
-    return Image.fromarray(result)
+    return Image.fromarray(
+        result
+    )
 
 
 # ============================================================
-# GRAD-CAM
+# GRAD-CAM CLASS
 # ============================================================
 
 class GradCAM:
@@ -571,6 +590,7 @@ class GradCAM:
     ):
 
         self.model = model
+
         self.activations = None
         self.gradients = None
 
@@ -670,6 +690,7 @@ class GradCAM:
         maximum = cam.max()
 
         if maximum > 0:
+
             cam /= maximum
 
         return cam
@@ -677,6 +698,7 @@ class GradCAM:
     def remove_hooks(self):
 
         self.forward_hook.remove()
+
         self.backward_hook.remove()
 
 
@@ -842,7 +864,7 @@ def predict(
 
 
 # ============================================================
-# AUTOMATIC CAM CROP
+# BBOX FROM GRAD-CAM
 # ============================================================
 
 def bbox_from_cam(
@@ -872,7 +894,9 @@ def bbox_from_cam(
             image_height
         ]
 
-    ys, xs = np.where(active)
+    ys, xs = np.where(
+        active
+    )
 
     x1 = xs.min()
     x2 = xs.max()
@@ -880,15 +904,22 @@ def bbox_from_cam(
     y1 = ys.min()
     y2 = ys.max()
 
-    roi_width = x2 - x1 + 1
-    roi_height = y2 - y1 + 1
+    roi_width = (
+        x2 - x1 + 1
+    )
+
+    roi_height = (
+        y2 - y1 + 1
+    )
 
     pad_x = int(
-        roi_width * padding_ratio
+        roi_width
+        * padding_ratio
     )
 
     pad_y = int(
-        roi_height * padding_ratio
+        roi_height
+        * padding_ratio
     )
 
     x1 -= pad_x
@@ -897,11 +928,13 @@ def bbox_from_cam(
     y2 += pad_y
 
     scale_x = (
-        image_width / IMAGE_SIZE
+        image_width
+        / IMAGE_SIZE
     )
 
     scale_y = (
-        image_height / IMAGE_SIZE
+        image_height
+        / IMAGE_SIZE
     )
 
     x1 = int(
@@ -932,7 +965,10 @@ def bbox_from_cam(
         )
     )
 
-    if x2 <= x1 or y2 <= y1:
+    if (
+        x2 <= x1
+        or y2 <= y1
+    ):
 
         return [
             0,
@@ -1004,7 +1040,7 @@ def generate_automatic_crop(
 
 
 # ============================================================
-# HERO
+# HERO SECTION
 # ============================================================
 
 st.markdown(
@@ -1032,7 +1068,7 @@ st.markdown(
 
 
 # ============================================================
-# DISCLAIMER — VISIBLE AT START
+# DISCLAIMER
 # ============================================================
 
 st.markdown(
@@ -1077,52 +1113,75 @@ with c1:
     st.markdown(
         """
         <div class="info-card">
-            <div class="info-label">Architecture</div>
+
+            <div class="info-label">
+                Architecture
+            </div>
+
             <div class="info-value">
                 Dual EfficientNet-B3
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with c2:
 
     st.markdown(
         """
         <div class="info-card">
-            <div class="info-label">Task</div>
+
+            <div class="info-label">
+                Task
+            </div>
+
             <div class="info-value">
                 Benign vs Malignant
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with c3:
 
     st.markdown(
         f"""
         <div class="info-card">
-            <div class="info-label">Input Resolution</div>
+
+            <div class="info-label">
+                Input Resolution
+            </div>
+
             <div class="info-value">
                 {IMAGE_SIZE} × {IMAGE_SIZE}
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with c4:
 
     st.markdown(
         """
         <div class="info-card">
-            <div class="info-label">Explainability</div>
+
+            <div class="info-label">
+                Explainability
+            </div>
+
             <div class="info-value">
                 Grad-CAM
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
@@ -1142,21 +1201,21 @@ st.markdown(
     """
     <div class="why-box">
 
-    As a Medical Imaging Technologist, I developed SonoInsight AI
-    to explore how artificial intelligence can complement medical
-    imaging workflows and make breast ultrasound analysis more
-    transparent.
+        As a Medical Imaging Technologist, I developed SonoInsight AI
+        to explore how artificial intelligence can complement medical
+        imaging workflows and make breast ultrasound analysis more
+        transparent.
 
-    Breast ultrasound images can demonstrate substantial variation
-    in lesion appearance, making consistent image-based assessment
-    challenging. This project investigates whether a dual-view
-    deep learning approach can learn from both the overall
-    ultrasound image and a focused lesion representation.
+        Breast ultrasound images can demonstrate substantial
+        variation in lesion appearance, making consistent image-based
+        assessment challenging. This project investigates whether a
+        dual-view deep learning approach can learn from both the
+        overall ultrasound image and a focused lesion representation.
 
-    The addition of Grad-CAM provides a visual explanation of
-    regions that contributed to the model's prediction, making
-    the system more interpretable for research and educational
-    purposes.
+        Grad-CAM is included to provide a visual indication of regions
+        that contributed to the model's prediction, supporting the
+        interpretability of the system for research and educational
+        purposes.
 
     </div>
     """,
@@ -1178,8 +1237,8 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sidebar-text">
-        Breast ultrasound research prototype using
-        dual-view deep learning and Grad-CAM.
+            Breast ultrasound research prototype using
+            dual-view deep learning and Grad-CAM.
         </div>
         """,
         unsafe_allow_html=True
@@ -1195,8 +1254,8 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sidebar-text">
-        The model estimates whether an ultrasound lesion
-        is more consistent with a benign or malignant class.
+            The model estimates whether an ultrasound lesion
+            belongs to the benign or malignant class.
         </div>
         """,
         unsafe_allow_html=True
@@ -1210,8 +1269,8 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sidebar-text">
-        🟢 <strong>Benign</strong><br>
-        🔴 <strong>Malignant</strong>
+            🟢 <strong>Benign</strong><br>
+            🔴 <strong>Malignant</strong>
         </div>
         """,
         unsafe_allow_html=True
@@ -1225,8 +1284,8 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sidebar-text">
-        The architecture combines information from the
-        full ultrasound image with a lesion-focused view.
+            The architecture combines information from the
+            full ultrasound image with a lesion-focused view.
         </div>
         """,
         unsafe_allow_html=True
@@ -1240,8 +1299,8 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sidebar-text">
-        Grad-CAM highlights image regions that contributed
-        to the selected model prediction.
+            Grad-CAM highlights image regions that contributed
+            to the selected model prediction.
         </div>
         """,
         unsafe_allow_html=True
@@ -1255,8 +1314,8 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sidebar-text">
-        This application is a research prototype.
-        AI output must not be interpreted as a clinical diagnosis.
+            This application is a research prototype.
+            AI output must not be interpreted as a clinical diagnosis.
         </div>
         """,
         unsafe_allow_html=True
@@ -1337,15 +1396,21 @@ if analysis_mode == "Explore Sample Cases":
         "model prediction, and Grad-CAM explanation."
     )
 
-    sample_names = list(SAMPLES.keys())
+    sample_names = list(
+        SAMPLES.keys()
+    )
 
     sample_cols = st.columns(4)
 
     selected_sample = None
 
-    for index, sample_name in enumerate(sample_names):
+    for index, sample_name in enumerate(
+        sample_names
+    ):
 
-        sample = SAMPLES[sample_name]
+        sample = SAMPLES[
+            sample_name
+        ]
 
         image_path = os.path.join(
             BASE_DIR,
@@ -1354,7 +1419,9 @@ if analysis_mode == "Explore Sample Cases":
 
         with sample_cols[index]:
 
-            if os.path.exists(image_path):
+            if os.path.exists(
+                image_path
+            ):
 
                 preview = Image.open(
                     image_path
@@ -1370,6 +1437,7 @@ if analysis_mode == "Explore Sample Cases":
                 <div class="sample-title">
                     {sample_name}
                 </div>
+
                 <div class="sample-label">
                     {sample["id"]}
                 </div>
@@ -1387,15 +1455,23 @@ if analysis_mode == "Explore Sample Cases":
 
     if "selected_sample" not in st.session_state:
 
-        st.session_state.selected_sample = sample_names[0]
+        st.session_state.selected_sample = (
+            sample_names[0]
+        )
 
     if selected_sample is not None:
 
-        st.session_state.selected_sample = selected_sample
+        st.session_state.selected_sample = (
+            selected_sample
+        )
 
-    selected_sample = st.session_state.selected_sample
+    selected_sample = (
+        st.session_state.selected_sample
+    )
 
-    sample = SAMPLES[selected_sample]
+    sample = SAMPLES[
+        selected_sample
+    ]
 
     image_path = os.path.join(
         BASE_DIR,
@@ -1407,7 +1483,9 @@ if analysis_mode == "Explore Sample Cases":
         sample["mask"]
     )
 
-    if not os.path.exists(image_path):
+    if not os.path.exists(
+        image_path
+    ):
 
         st.error(
             f"Sample image not found: {sample['image']}"
@@ -1421,7 +1499,9 @@ if analysis_mode == "Explore Sample Cases":
 
     mask = None
 
-    if os.path.exists(mask_path):
+    if os.path.exists(
+        mask_path
+    ):
 
         mask = Image.open(
             mask_path
@@ -1476,9 +1556,9 @@ if analysis_mode == "Explore Sample Cases":
 
     st.divider()
 
-    # --------------------------------------------------------
+    # ========================================================
     # CASE INFORMATION
-    # --------------------------------------------------------
+    # ========================================================
 
     st.markdown(
         "#### Case Information"
@@ -1507,9 +1587,9 @@ if analysis_mode == "Explore Sample Cases":
             sample["histology"]
         )
 
-    # --------------------------------------------------------
-    # PREDICTION
-    # --------------------------------------------------------
+    # ========================================================
+    # AI ASSESSMENT
+    # ========================================================
 
     st.markdown(
         "#### AI Assessment"
@@ -1531,8 +1611,10 @@ if analysis_mode == "Explore Sample Cases":
                 Model Prediction
             </div>
 
-            <div class="result-value"
-                 style="color:{result_color};">
+            <div
+                class="result-value"
+                style="color:{result_color};"
+            >
                 {prediction}
             </div>
 
@@ -1548,12 +1630,15 @@ if analysis_mode == "Explore Sample Cases":
         st.markdown(
             f"""
             <div class="probability-card">
+
                 <div class="probability-name">
                     🟢 Benign Probability
                 </div>
+
                 <div class="probability-value">
                     {benign_probability * 100:.1f}%
                 </div>
+
             </div>
             """,
             unsafe_allow_html=True
@@ -1564,20 +1649,23 @@ if analysis_mode == "Explore Sample Cases":
         st.markdown(
             f"""
             <div class="probability-card">
+
                 <div class="probability-name">
                     🔴 Malignant Probability
                 </div>
+
                 <div class="probability-value">
                     {malignant_probability * 100:.1f}%
                 </div>
+
             </div>
             """,
             unsafe_allow_html=True
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # VISUAL EXPLANATION
-    # --------------------------------------------------------
+    # ========================================================
 
     st.markdown(
         "#### Visual Explanation"
@@ -1652,7 +1740,7 @@ else:
             "jpg",
             "jpeg"
         ],
-        help="PNG, JPG and JPEG images are supported.",
+        help="PNG, JPG and JPEG images are supported."
     )
 
     if uploaded_file is None:
@@ -1738,9 +1826,9 @@ else:
 
                 st.divider()
 
-                # ------------------------------------------------
+                # ====================================================
                 # RESULT
-                # ------------------------------------------------
+                # ====================================================
 
                 st.markdown(
                     "#### AI Assessment"
@@ -1762,8 +1850,10 @@ else:
                             Model Prediction
                         </div>
 
-                        <div class="result-value"
-                             style="color:{result_color};">
+                        <div
+                            class="result-value"
+                            style="color:{result_color};"
+                        >
                             {prediction}
                         </div>
 
@@ -1779,12 +1869,15 @@ else:
                     st.markdown(
                         f"""
                         <div class="probability-card">
+
                             <div class="probability-name">
                                 🟢 Benign Probability
                             </div>
+
                             <div class="probability-value">
                                 {benign_probability * 100:.1f}%
                             </div>
+
                         </div>
                         """,
                         unsafe_allow_html=True
@@ -1795,20 +1888,23 @@ else:
                     st.markdown(
                         f"""
                         <div class="probability-card">
+
                             <div class="probability-name">
                                 🔴 Malignant Probability
                             </div>
+
                             <div class="probability-value">
                                 {malignant_probability * 100:.1f}%
                             </div>
+
                         </div>
                         """,
                         unsafe_allow_html=True
                     )
 
-                # ------------------------------------------------
+                # ====================================================
                 # VISUAL EXPLANATION
-                # ------------------------------------------------
+                # ====================================================
 
                 st.markdown(
                     "#### Visual Explanation"
@@ -1861,7 +1957,7 @@ else:
 
 
 # ============================================================
-# MODEL INFORMATION
+# TECHNICAL MODEL INFORMATION
 # ============================================================
 
 st.divider()
