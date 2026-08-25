@@ -796,8 +796,14 @@ def display_ai_assessment(
     # MODEL OUTPUT DISTRIBUTION
     # --------------------------------------------------------
 
-    st.markdown(
-        "**Model Output Distribution**"
+    with st.expander(
+    "View model probability distribution",
+    expanded=False,
+):
+
+    st.caption(
+        "The following values show the model's raw output "
+        "distribution for this image."
     )
 
     prob1, prob2 = st.columns(
