@@ -707,70 +707,49 @@ def display_ai_assessment(
     benign_probability,
     malignant_probability,
 ):
-    """
-    Present model output using probability separation rather
-    than calling the raw class probability "accuracy".
-    """
 
     # --------------------------------------------------------
     # PROBABILITY SEPARATION
     # --------------------------------------------------------
 
-    probabilities = [
-        benign_probability,
-        malignant_probability,
-    ]
-
-    highest_probability = max(probabilities)
-    lowest_probability = min(probabilities)
-
-    separation = (
-        highest_probability
-        - lowest_probability
+    probability_separation = abs(
+        benign_probability - malignant_probability
     )
 
     # --------------------------------------------------------
     # INTERPRETATION
     # --------------------------------------------------------
 
-    if separation >= 0.40:
+    if probability_separation < 0.10:
 
-        interpretation = "Strong model preference"
+        assessment_level = "Low model separation"
 
-        interpretation_message = (
-            "The model shows a clear probability separation "
-            "between the two classes for this image."
+        assessment_message = (
+            "The model assigns similar probabilities to both "
+            "classes for this image. This represents an uncertain "
+            "model output and should be interpreted cautiously."
         )
 
-        interpretation_type = "success"
+    elif probability_separation < 0.20:
 
-    elif separation >= 0.20:
+        assessment_level = "Moderate model separation"
 
-        interpretation = "Moderate model preference"
-
-        interpretation_message = (
-            "The model shows a moderate preference for the "
-            "predicted class, but the alternative class remains "
-            "meaningful."
+        assessment_message = (
+            "The model shows a preference for one class, but "
+            "the alternative class remains relatively close."
         )
-
-        interpretation_type = "warning"
 
     else:
 
-        interpretation = "Low model separation"
+        assessment_level = "Clearer model separation"
 
-        interpretation_message = (
-            "The model outputs similar probabilities for both "
-            "classes. This case should therefore be interpreted "
-            "as an uncertain model output rather than a strong "
-            "classification."
+        assessment_message = (
+            "The model shows a more distinct probability difference "
+            "between the two classes."
         )
 
-        interpretation_type = "warning"
-
     # --------------------------------------------------------
-    # PREDICTION
+    # MODEL PREDICTION
     # --------------------------------------------------------
 
     if prediction == "Benign":
@@ -786,29 +765,35 @@ def display_ai_assessment(
         )
 
     # --------------------------------------------------------
-    # MODEL INTERPRETATION
+    # MODEL OUTPUT INTERPRETATION
     # --------------------------------------------------------
 
-    if interpretation_type == "success":
+    if probability_separation < 0.10:
 
-        st.success(
-            f"**{interpretation}**"
+        st.warning(
+            f"**{assessment_level}**"
+        )
+
+    elif probability_separation < 0.20:
+
+        st.warning(
+            f"**{assessment_level}**"
         )
 
     else:
 
-        st.warning(
-            f"**{interpretation}**"
+        st.success(
+            f"**{assessment_level}**"
         )
 
     st.caption(
-        interpretation_message
+        assessment_message
     )
 
     st.write("")
 
     # --------------------------------------------------------
-    # PROBABILITY DISTRIBUTION
+    # MODEL OUTPUT DISTRIBUTION
     # --------------------------------------------------------
 
     st.markdown(
@@ -843,7 +828,7 @@ def display_ai_assessment(
         )
 
     # --------------------------------------------------------
-    # IMPORTANT INTERPRETATION NOTE
+    # INTERPRETATION NOTE
     # --------------------------------------------------------
 
     st.caption(
@@ -854,7 +839,8 @@ def display_ai_assessment(
     )
 
     st.caption(
-        f"Probability separation: {separation * 100:.1f} percentage points"
+        f"Probability separation: "
+        f"{probability_separation * 100:.1f} percentage points"
     )
 
 # ============================================================
