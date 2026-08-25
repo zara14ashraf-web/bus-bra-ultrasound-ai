@@ -951,46 +951,47 @@ with st.sidebar:
 # HERO
 # ============================================================
 
-st.markdown("""
-<div style="
-    text-align: center;
-    margin-bottom: 1.5rem;
-">
+st.markdown(
+    """
     <div style="
-        font-size: 2.45rem;
-        font-weight: 750;
-        color: #173f4d;
-        line-height: 1.2;
-        margin-bottom: 0.45rem;
+        text-align: center;
+        margin: 0 auto 1.8rem auto;
+        max-width: 900px;
     ">
-        AI-Assisted Breast Ultrasound Analysis
+        <div style="
+            font-size: 2.45rem;
+            font-weight: 750;
+            color: #173f4d;
+            line-height: 1.2;
+            margin-bottom: 0.45rem;
+        ">
+            AI-Assisted Breast Ultrasound Analysis
+        </div>
+
+        <div style="
+            font-size: 1.05rem;
+            color: #607984;
+            margin-bottom: 0.65rem;
+        ">
+            Deep Learning for Breast Lesion Classification
+        </div>
+
+        <div style="
+            max-width: 760px;
+            margin: 0 auto;
+            color: #71838b;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        ">
+            A research prototype exploring dual-view deep learning
+            for benign and malignant breast ultrasound classification,
+            with probability-based predictions and Grad-CAM
+            visual explainability.
+        </div>
     </div>
-
-    <div style="
-        font-size: 1.05rem;
-        color: #607984;
-        margin-bottom: 0.65rem;
-    ">
-        Deep Learning for Breast Lesion Classification
-    </div>
-
-    <div style="
-        max-width: 760px;
-        margin: auto;
-        color: #71838b;
-        font-size: 0.92rem;
-        line-height: 1.6;
-    ">
-        A research prototype exploring dual-view deep learning
-        for benign and malignant breast ultrasound classification,
-        with probability-based predictions and Grad-CAM
-        visual explainability.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-st.write("")
-
+    """,
+    unsafe_allow_html=True
+)
 
 # ============================================================
 # DISCLAIMER
