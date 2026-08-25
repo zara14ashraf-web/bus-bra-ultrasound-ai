@@ -1798,38 +1798,102 @@ else:
             use_container_width=True,
         )
 
+   # ============================================================
+# AI ASSESSMENT + REFERENCE
+# ============================================================
+
+st.write("")
+
+assessment_col, reference_col = st.columns(
+    [1.35, 1],
+    gap="large",
+)
+
+with assessment_col:
+
+    st.subheader(
+        "AI Assessment"
+    )
+
     # --------------------------------------------------------
-    # AI ASSESSMENT + REFERENCE
+    # PROBABILITY SEPARATION
     # --------------------------------------------------------
+
+    probability_separation = abs(
+        benign_probability - malignant_probability
+    )
+
+    # --------------------------------------------------------
+    # MODEL PREDICTION
+    # --------------------------------------------------------
+
+    if prediction == "Benign":
+
+        st.success(
+            "Model prediction: **BENIGN**"
+        )
+
+    else:
+
+        st.error(
+            "Model prediction: **MALIGNANT**"
+        )
 
     st.write("")
 
-    assessment_col, reference_col = st.columns(
-        [1.35, 1],
-        gap="large",
-    )
+    # --------------------------------------------------------
+    # MODEL SEPARATION
+    # --------------------------------------------------------
 
-    with assessment_col:
+    if probability_separation < 0.10:
 
-        st.subheader(
-            "AI Assessment"
+        st.warning(
+            "**Low model separation**"
         )
 
-        if prediction == "Benign":
+        st.caption(
+            "The model assigns similar probabilities to both "
+            "classes for this case. This indicates an uncertain "
+            "model output and should be interpreted cautiously."
+        )
 
-            st.success(
-                "Model prediction: **BENIGN**"
-            )
+    elif probability_separation < 0.20:
 
-        else:
+        st.warning(
+            "**Moderate model separation**"
+        )
 
-            st.error(
-                "Model prediction: **MALIGNANT**"
-            )
+        st.caption(
+            "The model shows a preference for the predicted class, "
+            "but the alternative class remains relatively close."
+        )
 
-        st.write("")
+    else:
 
-        prob1, prob2 = st.columns(2)
+        st.success(
+            "**Clearer model separation**"
+        )
+
+        st.caption(
+            "The model shows a more distinct probability difference "
+            "between the two classes."
+        )
+
+    st.write("")
+
+    # --------------------------------------------------------
+    # RAW PROBABILITIES
+    # --------------------------------------------------------
+
+    with st.expander(
+        "View model probability distribution",
+        expanded=False,
+    ):
+
+        prob1, prob2 = st.columns(
+            2,
+            gap="large",
+        )
 
         with prob1:
 
@@ -1854,38 +1918,43 @@ else:
             )
 
         st.caption(
-    "The displayed percentages represent the model's output "
-    "distribution for this image. They do not represent "
-    "diagnostic accuracy or clinical certainty."
-)
-
-    with reference_col:
-
-        st.subheader(
-            "Reference Information"
+            "These percentages represent the model's output "
+            "distribution for this image. They do not represent "
+            "diagnostic accuracy, disease probability, or "
+            "clinical certainty."
         )
 
         st.caption(
-            "DATASET REFERENCE"
+            f"Probability separation: "
+            f"{probability_separation * 100:.1f} percentage points"
         )
 
-        st.markdown(
-            f"**{sample['label']}**"
-        )
+with reference_col:
 
-        st.caption(
-            "HISTOLOGY"
-        )
+    st.subheader(
+        "Reference Information"
+    )
 
-        st.markdown(
-            f"**{sample['histology']}**"
-        )
+    st.caption(
+        "DATASET REFERENCE"
+    )
 
-        st.caption(
-            "Reference information is shown only "
-            "for dataset comparison."
-        )
+    st.markdown(
+        f"**{sample['label']}**"
+    )
 
+    st.caption(
+        "HISTOLOGY"
+    )
+
+    st.markdown(
+        f"**{sample['histology']}**"
+    )
+
+    st.caption(
+        "Reference information is shown only "
+        "for dataset comparison."
+    )
     # --------------------------------------------------------
     # DISCLAIMER
     # --------------------------------------------------------
