@@ -1143,6 +1143,7 @@ mode = st.radio(
     label_visibility="collapsed",
 )
 
+
 # ============================================================
 # UPLOAD MODE
 # ============================================================
@@ -1151,9 +1152,23 @@ if mode == "Upload Ultrasound":
 
     st.write("")
 
+    st.markdown(
+        "#### Upload an ultrasound image"
+    )
+
+    st.caption(
+        "Choose a breast ultrasound image to begin the "
+        "AI-assisted research analysis."
+    )
+
     uploaded_file = st.file_uploader(
-        "Upload a breast ultrasound image",
-        type=["png", "jpg", "jpeg"],
+        "Upload ultrasound",
+        type=[
+            "png",
+            "jpg",
+            "jpeg",
+        ],
+        label_visibility="collapsed",
         help=(
             "Supported formats: PNG, JPG and JPEG. "
             "Please remove patient-identifying information "
@@ -1161,7 +1176,28 @@ if mode == "Upload Ultrasound":
         ),
     )
 
-    if uploaded_file is not None:
+    # --------------------------------------------------------
+    # NO IMAGE
+    # --------------------------------------------------------
+
+    if uploaded_file is None:
+
+        st.info(
+            "PNG, JPG and JPEG images are supported. "
+            "Please remove patient-identifying information "
+            "before uploading."
+        )
+
+        st.caption(
+            "Research & educational prototype — "
+            "not intended for clinical diagnosis."
+        )
+
+    # --------------------------------------------------------
+    # IMAGE UPLOADED
+    # --------------------------------------------------------
+
+    else:
 
         image = Image.open(
             uploaded_file
@@ -1170,12 +1206,13 @@ if mode == "Upload Ultrasound":
         width, height = image.size
 
         st.write("")
-               # ----------------------------------------------------
+
+        # ----------------------------------------------------
         # IMAGE PREVIEW
         # ----------------------------------------------------
 
         preview_col, info_col = st.columns(
-            [2.4, 1],
+            [2.3, 1],
             gap="large",
         )
 
@@ -1193,15 +1230,35 @@ if mode == "Upload Ultrasound":
                 "#### Image Information"
             )
 
-            st.write(
-                f"**Dimensions**  \n"
-                f"{width} × {height} px"
+            st.markdown(
+                f"""
+                <div style="
+                    font-size: 1.35rem;
+                    font-weight: 700;
+                    color: #173f4d;
+                    margin: 0.25rem 0 0.15rem 0;
+                ">
+                    {width} × {height} px
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
 
-            st.write(
-                "**Format**  \n"
+            st.caption(
+                "Image dimensions"
+            )
+
+            st.write("")
+
+            st.markdown(
+                "**Format**"
+            )
+
+            st.caption(
                 "Ultrasound image"
             )
+
+            st.write("")
 
             st.caption(
                 "Please ensure patient-identifying information "
@@ -1209,6 +1266,7 @@ if mode == "Upload Ultrasound":
             )
 
         st.write("")
+
         # ----------------------------------------------------
         # ANALYZE BUTTON
         # ----------------------------------------------------
@@ -1227,12 +1285,20 @@ if mode == "Upload Ultrasound":
                     "Analyzing ultrasound..."
                 ):
 
+                    # ----------------------------------------
+                    # AUTOMATIC LESION CROP
+                    # ----------------------------------------
+
                     crop_image = (
                         generate_automatic_crop(
                             model,
                             image,
                         )
                     )
+
+                    # ----------------------------------------
+                    # PREDICTION
+                    # ----------------------------------------
 
                     (
                         prediction,
@@ -1252,6 +1318,10 @@ if mode == "Upload Ultrasound":
                         else 0
                     )
 
+                    # ----------------------------------------
+                    # GRAD-CAM
+                    # ----------------------------------------
+
                     cam = generate_gradcam(
                         model,
                         full_tensor,
@@ -1266,9 +1336,9 @@ if mode == "Upload Ultrasound":
                         )
                     )
 
-                # ------------------------------------------------
+                # =================================================
                 # AI ASSESSMENT
-                # ------------------------------------------------
+                # =================================================
 
                 st.divider()
 
@@ -1290,9 +1360,9 @@ if mode == "Upload Ultrasound":
 
                 st.write("")
 
-                # ------------------------------------------------
+                # ---------------------------------------------
                 # PROBABILITIES
-                # ------------------------------------------------
+                # ---------------------------------------------
 
                 prob1, prob2 = st.columns(
                     2,
@@ -1302,7 +1372,7 @@ if mode == "Upload Ultrasound":
                 with prob1:
 
                     st.metric(
-                        "Benign Probability",
+                        "Benign",
                         f"{benign_probability * 100:.1f}%",
                     )
 
@@ -1313,7 +1383,7 @@ if mode == "Upload Ultrasound":
                 with prob2:
 
                     st.metric(
-                        "Malignant Probability",
+                        "Malignant",
                         f"{malignant_probability * 100:.1f}%",
                     )
 
@@ -1325,9 +1395,9 @@ if mode == "Upload Ultrasound":
                     f"Decision threshold: {THRESHOLD:.2f}"
                 )
 
-                # ------------------------------------------------
+                # =================================================
                 # VISUAL EXPLANATION
-                # ------------------------------------------------
+                # =================================================
 
                 st.write("")
 
@@ -1336,10 +1406,9 @@ if mode == "Upload Ultrasound":
                 )
 
                 st.caption(
-                    "The following views illustrate the original "
-                    "ultrasound, the automatically generated "
-                    "lesion-focused representation, and the regions "
-                    "highlighted by Grad-CAM."
+                    "Compare the original ultrasound, the "
+                    "automatically generated lesion-focused view, "
+                    "and the regions highlighted by Grad-CAM."
                 )
 
                 visual1, visual2, visual3 = st.columns(
@@ -1372,9 +1441,20 @@ if mode == "Upload Ultrasound":
                     )
 
                 st.info(
-                    "The lesion-focused view is generated automatically "
-                    "for the uploaded image. It is not a definitive "
-                    "lesion segmentation."
+                    "The lesion-focused view is generated "
+                    "automatically from model attention. It is "
+                    "not a definitive lesion segmentation."
+                )
+
+                # ---------------------------------------------
+                # DISCLAIMER
+                # ---------------------------------------------
+
+                st.caption(
+                    "Research & educational prototype. "
+                    "AI predictions are not a clinical diagnosis "
+                    "and should not replace assessment by a "
+                    "qualified healthcare professional."
                 )
 
             except Exception as error:
@@ -1396,33 +1476,99 @@ else:
 
     st.caption(
         "Explore representative BUS-BRA cases and compare "
-        "the model prediction with the reference result."
+        "the model prediction with reference information."
     )
 
-    # --------------------------------------------------------
-    # SAMPLE CASE SELECTION
-    # --------------------------------------------------------
+    # ========================================================
+    # SAMPLE CASE THUMBNAILS
+    # ========================================================
 
-    sample_names = list(SAMPLES.keys())
+    sample_names = list(
+        SAMPLES.keys()
+    )
 
     if "selected_sample" not in st.session_state:
-        st.session_state.selected_sample = sample_names[0]
 
-    sample_selector = st.selectbox(
-        "Select a sample case",
-        sample_names,
-        index=sample_names.index(
-            st.session_state.selected_sample
-        ),
+        st.session_state.selected_sample = (
+            sample_names[0]
+        )
+
+    st.markdown(
+        "#### Explore Sample Cases"
     )
 
-    st.session_state.selected_sample = sample_selector
+    st.caption(
+        "Select a representative case to explore the "
+        "ultrasound and model analysis."
+    )
 
-    sample = SAMPLES[sample_selector]
+    sample_cols = st.columns(
+        len(sample_names),
+        gap="medium",
+    )
 
-    # --------------------------------------------------------
-    # LOAD SAMPLE IMAGE
-    # --------------------------------------------------------
+    for index, sample_name in enumerate(
+        sample_names
+    ):
+
+        sample_data = SAMPLES[
+            sample_name
+        ]
+
+        sample_image_path = os.path.join(
+            BASE_DIR,
+            sample_data["image"],
+        )
+
+        with sample_cols[index]:
+
+            if os.path.exists(
+                sample_image_path
+            ):
+
+                thumbnail = Image.open(
+                    sample_image_path
+                ).convert("RGB")
+
+                st.image(
+                    thumbnail,
+                    use_container_width=True,
+                )
+
+            # Short display name
+            if "Benign" in sample_name:
+
+                display_name = (
+                    f"Sample {index + 1} · Benign"
+                )
+
+            else:
+
+                display_name = (
+                    f"Sample {index + 1} · Malignant"
+                )
+
+            if st.button(
+                display_name,
+                key=f"sample_select_{index}",
+                use_container_width=True,
+            ):
+
+                st.session_state.selected_sample = (
+                    sample_name
+                )
+
+    sample_selector = (
+        st.session_state.selected_sample
+    )
+
+    sample = SAMPLES[
+        sample_selector
+    ]
+
+    # ========================================================
+    # LOAD SAMPLE
+    # ========================================================
 
     image_path = os.path.join(
         BASE_DIR,
@@ -1434,10 +1580,12 @@ else:
         sample["mask"],
     )
 
-    if not os.path.exists(image_path):
+    if not os.path.exists(
+        image_path
+    ):
 
         st.error(
-            f"Sample image not found: {sample['image']}"
+            "The selected sample image could not be found."
         )
 
         st.stop()
@@ -1448,43 +1596,99 @@ else:
 
     mask = None
 
-    if os.path.exists(mask_path):
+    if os.path.exists(
+        mask_path
+    ):
 
         mask = Image.open(
             mask_path
         ).convert("L")
 
-    # --------------------------------------------------------
-    # SAMPLE IMAGE
-    # --------------------------------------------------------
+    # ========================================================
+    # SELECTED SAMPLE
+    # ========================================================
 
     st.write("")
 
-    st.image(
-        image,
-        caption=f"Sample Case · {sample_selector}",
-        use_container_width=True,
+    st.markdown(
+        "### Selected Sample"
     )
-    # --------------------------------------------------------
-    # LESION-FOCUSED VIEW
-    # --------------------------------------------------------
+
+    st.caption(
+        "Representative BUS-BRA case for research "
+        "and educational demonstration."
+    )
+
+    # ========================================================
+    # ORIGINAL IMAGE + REFERENCE
+    # ========================================================
+
+    image_col, reference_col = st.columns(
+        [2.2, 1],
+        gap="large",
+    )
+
+    with image_col:
+
+        st.image(
+            image,
+            caption="Original Ultrasound",
+            use_container_width=True,
+        )
+
+    with reference_col:
+
+        st.markdown(
+            "#### Reference"
+        )
+
+        st.markdown(
+            f"""
+            <div style="
+                font-size: 1.65rem;
+                font-weight: 750;
+                color: #173f4d;
+                margin: 0.25rem 0 0.25rem 0;
+            ">
+                {sample["label"]}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.caption(
+            "Reference class"
+        )
+
+        st.write("")
+
+        st.markdown(
+            "**Histology**"
+        )
+
+        st.write(
+            sample["histology"]
+        )
+
+        st.write("")
+
+        st.caption(
+            "Reference information is shown for "
+            "comparison with the AI prediction."
+        )
+
+    # ========================================================
+    # LESION CROP
+    # ========================================================
 
     crop_image = make_lesion_crop(
         image,
         sample["bbox"],
     )
 
-    with image_col2:
-
-        st.image(
-            crop_image,
-            caption="Lesion-Focused View",
-            use_container_width=True,
-        )
-
-    # --------------------------------------------------------
+    # ========================================================
     # MODEL ANALYSIS
-    # --------------------------------------------------------
+    # ========================================================
 
     try:
 
@@ -1513,9 +1717,11 @@ else:
             predicted_class,
         )
 
-        gradcam_image = create_gradcam_overlay(
-            image,
-            cam,
+        gradcam_image = (
+            create_gradcam_overlay(
+                image,
+                cam,
+            )
         )
 
     except Exception as error:
@@ -1528,13 +1734,15 @@ else:
 
         st.stop()
 
-    # --------------------------------------------------------
+    # ========================================================
     # AI ASSESSMENT
-    # --------------------------------------------------------
+    # ========================================================
 
     st.divider()
 
-    st.subheader("AI Assessment")
+    st.subheader(
+        "AI Assessment"
+    )
 
     if prediction == "Benign":
 
@@ -1558,7 +1766,7 @@ else:
     with prob1:
 
         st.metric(
-            "Benign Probability",
+            "Benign",
             f"{benign_probability * 100:.1f}%",
         )
 
@@ -1569,7 +1777,7 @@ else:
     with prob2:
 
         st.metric(
-            "Malignant Probability",
+            "Malignant",
             f"{malignant_probability * 100:.1f}%",
         )
 
@@ -1581,55 +1789,83 @@ else:
         f"Decision threshold: {THRESHOLD:.2f}"
     )
 
-    # --------------------------------------------------------
-    # REFERENCE INFORMATION
-    # --------------------------------------------------------
+    # ========================================================
+    # REFERENCE COMPARISON
+    # ========================================================
 
     st.write("")
 
-    st.markdown("#### Reference Information")
-
-    ref_col1, ref_col2 = st.columns(2)
-
-    with ref_col1:
-
-        st.caption("REFERENCE CLASS")
-
-        st.markdown(
-            f"**{sample.get('pathology', 'Not available')}**"
-        )
-
-    with ref_col2:
-
-        st.caption("HISTOLOGY")
-
-        st.markdown(
-            f"**{sample.get('histology', 'Not available')}**"
-        )
-
-    # --------------------------------------------------------
-    # DISCLAIMER
-    # --------------------------------------------------------
-
-    st.info(
-        "**Research & Educational Use Only**  \n"
-        "Reference information is provided for dataset "
-        "demonstration and comparison. AI predictions are "
-        "not a clinical diagnosis and should not replace "
-        "assessment by a qualified healthcare professional."
+    comparison_col1, comparison_col2 = st.columns(
+        2,
+        gap="large",
     )
 
-    # --------------------------------------------------------
+    with comparison_col1:
+
+        st.caption(
+            "REFERENCE"
+        )
+
+        st.markdown(
+            f"**{sample['label']}**"
+        )
+
+        st.caption(
+            sample["histology"]
+        )
+
+    with comparison_col2:
+
+        st.caption(
+            "AI PREDICTION"
+        )
+
+        st.markdown(
+            f"**{prediction}**"
+        )
+
+        if prediction == sample["label"]:
+
+            st.caption(
+                "Prediction matches the reference class."
+            )
+
+        else:
+
+            st.caption(
+                "Prediction differs from the reference class."
+            )
+
+    # ========================================================
+    # SAMPLE DISCLAIMER
+    # ========================================================
+
+    st.info(
+        """
+        **Research & Educational Prototype**
+
+        This representative case is provided for research and
+        educational demonstration only. Reference information
+        is shown for comparison and the AI prediction is not
+        a clinical diagnosis. This system should not be used
+        to diagnose, exclude, or guide treatment of breast
+        disease.
+        """
+    )
+
+    # ========================================================
     # VISUAL EXPLANATION
-    # --------------------------------------------------------
+    # ========================================================
 
     st.write("")
 
-    st.subheader("Visual Explanation")
+    st.subheader(
+        "Visual Explanation"
+    )
 
     st.caption(
-        "Grad-CAM highlights image regions that contributed "
-        "to the selected model prediction."
+        "Compare the original ultrasound, lesion-focused "
+        "representation, and Grad-CAM model attention."
     )
 
     visual1, visual2, visual3 = st.columns(
@@ -1661,167 +1897,18 @@ else:
             use_container_width=True,
         )
 
-    st.caption(
-        "The lesion-focused view is based on the reference "
-        "lesion region available for this representative "
-        "dataset case. Grad-CAM represents model attention "
-        "and is not a definitive lesion segmentation."
-    )
-    # --------------------------------------------------------
-    # LESION-FOCUSED VIEW
-    # --------------------------------------------------------
+    # ========================================================
+    # REFERENCE MASK
+    # ========================================================
 
-    crop_image = make_lesion_crop(
-        image,
-        sample["bbox"],
-    )
+    if mask is not None:
 
-    # --------------------------------------------------------
-    # MODEL ANALYSIS
-    # --------------------------------------------------------
+        st.write("")
 
-    try:
-
-        (
-            prediction,
-            benign_probability,
-            malignant_probability,
-            full_tensor,
-            crop_tensor,
-        ) = predict(
-            model,
-            image,
-            crop_image,
-        )
-
-        predicted_class = (
-            1
-            if prediction == "Malignant"
-            else 0
-        )
-
-        cam = generate_gradcam(
-            model,
-            full_tensor,
-            crop_tensor,
-            predicted_class,
-        )
-
-        gradcam_image = create_gradcam_overlay(
-            image,
-            cam,
-        )
-
-    except Exception as error:
-
-        st.error(
-            "Sample analysis failed."
-        )
-
-        st.exception(error)
-
-        st.stop()
-    # --------------------------------------------------------
-    # CASE INFORMATION
-    # --------------------------------------------------------
-
-    st.subheader(
-        "Case Information"
-    )
-
-    case1, case2, case3 = st.columns(3)
-
-    with case1:
-
-        st.metric(
-            "Case ID",
-            sample["id"],
-        )
-
-    with case2:
-
-        st.metric(
-            "Reference Class",
-            sample["label"],
-        )
-
-    with case3:
-
-        st.metric(
-            "Histology",
-            sample["histology"],
-        )
-
-    # --------------------------------------------------------
-    # PREDICTION
-    # --------------------------------------------------------
-
-    st.subheader(
-        "AI Assessment"
-    )
-
-    if prediction == "Benign":
-
-        st.success(
-            "Model prediction: **BENIGN**"
-        )
-
-    else:
-
-        st.error(
-            "Model prediction: **MALIGNANT**"
-        )
-
-    prob1, prob2 = st.columns(2)
-
-    with prob1:
-
-        st.metric(
-            "Benign Probability",
-            f"{benign_probability * 100:.1f}%",
-        )
-
-        st.progress(
-            benign_probability
-        )
-
-    with prob2:
-
-        st.metric(
-            "Malignant Probability",
-            f"{malignant_probability * 100:.1f}%",
-        )
-
-        st.progress(
-            malignant_probability
-        )
-
-    # --------------------------------------------------------
-    # VISUAL EXPLANATION
-    # --------------------------------------------------------
-
-    st.subheader(
-        "Visual Explanation"
-    )
-
-    st.caption(
-        "Compare the original ultrasound, reference lesion "
-        "annotation and the model's Grad-CAM attention."
-    )
-
-    visual1, visual2, visual3 = st.columns(3)
-
-    with visual1:
-
-        st.image(
-            image,
-            caption="Original Ultrasound",
-            use_container_width=True,
-        )
-
-    with visual2:
-
-        if mask is not None:
+        with st.expander(
+            "View Reference Lesion Annotation",
+            expanded=False,
+        ):
 
             mask_overlay = create_mask_overlay(
                 image,
@@ -1834,27 +1921,11 @@ else:
                 use_container_width=True,
             )
 
-        else:
-
-            st.image(
-                image,
-                caption="Original Ultrasound",
-                use_container_width=True,
+            st.caption(
+                "The reference annotation is provided by the "
+                "BUS-BRA dataset for research comparison. "
+                "It is not generated by the AI model."
             )
-
-    with visual3:
-
-        st.image(
-            gradcam_image,
-            caption="Grad-CAM Attention",
-            use_container_width=True,
-        )
-
-    st.info(
-        "For these representative BUS-BRA cases, the lesion-focused "
-        "view is generated using the reference bounding box available "
-        "with the sample case."
-    )
 
 
 # ============================================================
@@ -1867,7 +1938,9 @@ with st.expander(
     "Technical Model Information"
 ):
 
-    technical1, technical2 = st.columns(2)
+    technical1, technical2 = st.columns(
+        2
+    )
 
     with technical1:
 
