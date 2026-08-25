@@ -1163,18 +1163,12 @@ if mode == "Upload Ultrasound":
 
     if uploaded_file is None:
 
-        st.write("")
+        if uploaded_file is None:
 
-        st.markdown("#### Upload an ultrasound image")
-
-        st.caption(
-            "Choose a breast ultrasound image to begin the "
-            "AI-assisted research analysis."
-        )
-
-        st.caption(
-            "Supported formats: PNG, JPG and JPEG"
-        )
+    st.caption(
+        "Choose a breast ultrasound image to begin the "
+        "AI-assisted research analysis."
+    )
 
     else:
 
