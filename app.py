@@ -1441,10 +1441,11 @@ if mode == "Upload Ultrasound":
                     )
 
                 st.info(
-                    "The lesion-focused view is generated "
-                    "automatically from model attention. It is "
-                    "not a definitive lesion segmentation."
-                )
+    "For uploaded images, the focused view is generated "
+    "automatically based on model attention. It is intended "
+    "as an additional representation for analysis and does "
+    "not represent a definitive lesion segmentation."
+)
 
                 # ---------------------------------------------
                 # DISCLAIMER
