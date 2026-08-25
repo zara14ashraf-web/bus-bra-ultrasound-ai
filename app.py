@@ -1478,21 +1478,21 @@ if mode == "Upload Ultrasound":
                         )
                     )
 
-               # =================================================
-# AI ASSESSMENT
-# =================================================
+                # =================================================
+                # AI ASSESSMENT
+                # =================================================
 
-st.divider()
+                st.divider()
 
-st.subheader(
-    "AI Assessment"
-)
+                st.subheader(
+                    "AI Assessment"
+                )
 
-display_ai_assessment(
-    prediction,
-    benign_probability,
-    malignant_probability,
-)
+                display_ai_assessment(
+                    prediction,
+                    benign_probability,
+                    malignant_probability,
+                )
 
                 # =================================================
                 # VISUAL EXPLANATION
@@ -1540,11 +1540,11 @@ display_ai_assessment(
                     )
 
                 st.info(
-    "For uploaded images, the focused view is generated "
-    "automatically based on model attention. It is intended "
-    "as an additional representation for analysis and does "
-    "not represent a definitive lesion segmentation."
-)
+                    "For uploaded images, the focused view is generated "
+                    "automatically based on model attention. It is intended "
+                    "as an additional representation for analysis and does "
+                    "not represent a definitive lesion segmentation."
+                )
 
                 # ---------------------------------------------
                 # DISCLAIMER
@@ -1564,6 +1564,11 @@ display_ai_assessment(
                 )
 
                 st.exception(error)
+
+
+# ============================================================
+# SAMPLE CASE MODE
+# ============================================================
 
 
 # ============================================================
