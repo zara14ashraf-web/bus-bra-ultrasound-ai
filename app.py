@@ -1579,9 +1579,15 @@ if mode == "Upload Ultrasound":
         """
         **Research & Educational Prototype**
 
-        This sample case is provided for research and educational demonstration only. The reference information belongs to the dataset and the AI
-        prediction is not a clinical diagnosis. This application should not be used to diagnose,exclude, or guide treatment of breast disease.
-        AI predictions should not replace assessment by a qualified healthcare professional.  """
+        This sample case is provided for research and
+        educational demonstration only. The reference
+        information belongs to the dataset and the AI
+        prediction is not a clinical diagnosis. This
+        application should not be used to diagnose,
+        exclude, or guide treatment of breast disease.
+        AI predictions should not replace assessment by
+        a qualified healthcare professional.
+        """
     )
 
     st.caption(
