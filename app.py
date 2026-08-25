@@ -1124,24 +1124,24 @@ except Exception as error:
 
 st.divider()
 
-st.subheader(
-    "Analyze a Breast Ultrasound"
+st.markdown(
+    "### Analyze Breast Ultrasound"
 )
 
 st.caption(
-    "Choose a representative sample or upload an ultrasound "
-    "image to explore the model."
+    "Upload an ultrasound image or explore a representative "
+    "sample case to see how the model analyzes breast lesions."
 )
 
 mode = st.radio(
-    "Analysis option",
+    "Choose an analysis method",
     [
         "Upload Ultrasound",
         "Explore Sample Cases",
     ],
     horizontal=True,
+    label_visibility="collapsed",
 )
-
 
 # ============================================================
 # UPLOAD MODE
