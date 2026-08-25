@@ -1564,25 +1564,33 @@ if mode == "Upload Ultrasound":
                     "not represent a definitive lesion segmentation."
                 )
 
-                # ---------------------------------------------
-                # DISCLAIMER
-                # ---------------------------------------------
+                # --------------------------------------------------------
+# DISCLAIMER
+# --------------------------------------------------------
 
-                st.caption(
-                    "Research & educational prototype. "
-                    "AI predictions are not a clinical diagnosis "
-                    "and should not replace assessment by a "
-                    "qualified healthcare professional."
-                )
+st.write("")
 
-            except Exception as error:
+st.info(
+    """
+    **Research & Educational Prototype**
 
-                st.error(
-                    "Prediction failed."
-                )
+    This sample case is provided for research and
+    educational demonstration only. The reference
+    information belongs to the dataset and the AI
+    prediction is not a clinical diagnosis. This
+    application should not be used to diagnose,
+    exclude, or guide treatment of breast disease.
+    AI predictions should not replace assessment by
+    a qualified healthcare professional.
+    """
+)
 
-                st.exception(error)
-
+st.caption(
+    "The lesion-focused view uses the reference lesion "
+    "region available for this representative BUS-BRA case. "
+    "Grad-CAM indicates model attention and is not a "
+    "definitive lesion segmentation."
+)
 
 # ============================================================
 # SAMPLE CASE MODE
