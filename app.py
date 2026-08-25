@@ -1161,9 +1161,7 @@ if mode == "Upload Ultrasound":
         ),
     )
 
-   
-
-    else:
+    if uploaded_file is not None:
 
         image = Image.open(
             uploaded_file
@@ -1172,7 +1170,6 @@ if mode == "Upload Ultrasound":
         width, height = image.size
 
         st.write("")
-
         # ----------------------------------------------------
         # IMAGE PREVIEW
         # ----------------------------------------------------
