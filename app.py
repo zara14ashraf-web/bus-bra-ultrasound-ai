@@ -1479,60 +1479,45 @@ else:
         "and see how the model analyzes each lesion."
     )
 
-    # --------------------------------------------------------
-    # SAMPLE CASE SELECTOR
-    # --------------------------------------------------------
+   # --------------------------------------------------------
+# SAMPLE CASE SELECTOR
+# --------------------------------------------------------
 
-    sample_names = list(SAMPLES.keys())
+sample_names = list(SAMPLES.keys())
 
-    if "selected_sample" not in st.session_state:
-        st.session_state.selected_sample = sample_names[0]
+if "selected_sample" not in st.session_state:
+    st.session_state.selected_sample = sample_names[0]
 
-    st.markdown(
-        "#### Representative Sample Cases"
-    )
+st.markdown(
+    "#### Representative Sample Cases"
+)
 
-    st.caption(
-        "Select a case to view its ultrasound analysis."
-    )
+st.caption(
+    "Select a sample case to explore its AI-assisted analysis."
+)
 
-    sample_cols = st.columns(
-        4,
-        gap="medium",
-    )
+sample_cols = st.columns(
+    4,
+    gap="medium",
+)
 
-    for i, sample_name in enumerate(sample_names):
+for i, sample_name in enumerate(sample_names):
 
-        sample_item = SAMPLES[sample_name]
+    with sample_cols[i]:
 
-        sample_image_path = os.path.join(
-            BASE_DIR,
-            sample_item["image"],
-        )
+        if st.button(
+            f"Sample {i + 1}",
+            key=f"sample_button_{i}",
+            use_container_width=True,
+        ):
 
-        with sample_cols[i]:
+            st.session_state.selected_sample = sample_name
 
-            if os.path.exists(sample_image_path):
+selected_sample_name = (
+    st.session_state.selected_sample
+)
 
-                sample_thumb = Image.open(
-                    sample_image_path
-                ).convert("RGB")
-
-                st.image(
-                    sample_thumb,
-                    use_container_width=True,
-                )
-
-            if st.button(
-                f"Sample {i + 1}",
-                key=f"sample_button_{i}",
-                use_container_width=True,
-            ):
-
-                st.session_state.selected_sample = (
-                    sample_name
-                )
-
+sample = SAMPLES[selected_sample_name]
     # --------------------------------------------------------
     # SELECTED SAMPLE
     # --------------------------------------------------------
