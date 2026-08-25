@@ -1161,14 +1161,7 @@ if mode == "Upload Ultrasound":
         ),
     )
 
-    if uploaded_file is None:
-
-        if uploaded_file is None:
-
-    st.caption(
-        "Choose a breast ultrasound image to begin the "
-        "AI-assisted research analysis."
-    )
+   
 
     else:
 
