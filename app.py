@@ -1851,8 +1851,10 @@ else:
             )
 
         st.caption(
-            f"Decision threshold: {THRESHOLD:.2f}"
-        )
+    "The displayed percentages represent the model's output "
+    "distribution for this image. They do not represent "
+    "diagnostic accuracy or clinical certainty."
+)
 
     with reference_col:
 
