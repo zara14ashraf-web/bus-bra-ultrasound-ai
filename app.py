@@ -1476,7 +1476,7 @@ else:
     st.write("")
 
     st.caption(
-        "Explore representative BUS-BRA ultrasound cases "
+        "Explore representative ultrasound cases "
         "and see how the model analyzes each lesion."
     )
 
