@@ -1,3 +1,4 @@
+```python
 import os
 import requests
 
@@ -1925,3 +1926,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+```
