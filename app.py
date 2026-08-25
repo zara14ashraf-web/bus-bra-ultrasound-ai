@@ -1563,7 +1563,13 @@ if mode == "Upload Ultrasound":
                     "as an additional representation for analysis and does "
                     "not represent a definitive lesion segmentation."
                 )
+            except Exception as error:
 
+                st.error(
+                    "Prediction failed."
+                )
+
+                st.exception(error)
     # --------------------------------------------------------
     # DISCLAIMER
     # --------------------------------------------------------
