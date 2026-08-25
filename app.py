@@ -765,7 +765,7 @@ def display_ai_assessment(
         )
 
     # --------------------------------------------------------
-    # MODEL OUTPUT INTERPRETATION
+    # MODEL SEPARATION
     # --------------------------------------------------------
 
     if probability_separation < 0.10:
@@ -793,44 +793,55 @@ def display_ai_assessment(
     st.write("")
 
     # --------------------------------------------------------
-    # MODEL OUTPUT DISTRIBUTION
+    # RAW MODEL OUTPUT
     # --------------------------------------------------------
 
     with st.expander(
-    "View model probability distribution",
-    expanded=False,
-):
+        "View model probability distribution",
+        expanded=False,
+    ):
 
-    st.caption(
-        "The following values show the model's raw output "
-        "distribution for this image."
-    )
-
-    prob1, prob2 = st.columns(
-        2,
-        gap="large",
-    )
-
-    with prob1:
-
-        st.metric(
-            "Benign",
-            f"{benign_probability * 100:.1f}%",
+        st.caption(
+            "These values show the model's raw output "
+            "distribution for this image."
         )
 
-        st.progress(
-            benign_probability
+        prob1, prob2 = st.columns(
+            2,
+            gap="large",
         )
 
-    with prob2:
+        with prob1:
 
-        st.metric(
-            "Malignant",
-            f"{malignant_probability * 100:.1f}%",
+            st.metric(
+                "Benign",
+                f"{benign_probability * 100:.1f}%",
+            )
+
+            st.progress(
+                benign_probability
+            )
+
+        with prob2:
+
+            st.metric(
+                "Malignant",
+                f"{malignant_probability * 100:.1f}%",
+            )
+
+            st.progress(
+                malignant_probability
+            )
+
+        st.caption(
+            "These percentages represent the model's output "
+            "distribution. They do not represent diagnostic "
+            "accuracy, disease probability, or clinical certainty."
         )
 
-        st.progress(
-            malignant_probability
+        st.caption(
+            f"Probability separation: "
+            f"{probability_separation * 100:.1f} percentage points"
         )
 
     # --------------------------------------------------------
