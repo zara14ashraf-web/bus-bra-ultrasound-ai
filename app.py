@@ -1161,28 +1161,7 @@ if mode == "Upload Ultrasound":
         ),
     )
 
-    if uploaded_file is None:
-
-        st.write("")
-
-        st.markdown("#### Upload an ultrasound image")
-
-        st.caption(
-            "Choose a breast ultrasound image to begin the "
-            "AI-assisted research analysis."
-        )
-
-        st.caption(
-            "Supported formats: PNG, JPG and JPEG"
-        )
-
-    else:
-
-        image = Image.open(
-            uploaded_file
-        ).convert("RGB")
-
-        width, height = image.size
+   
 
         st.write("")
 
