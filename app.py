@@ -707,50 +707,19 @@ def display_ai_assessment(
     benign_probability,
     malignant_probability,
 ):
-    """
-    Display the model prediction together with
-    probability distribution and confidence interpretation.
-    """
 
-    confidence = max(
+    model_support = max(
         benign_probability,
         malignant_probability,
     )
 
-    # --------------------------------------------------------
-    # CONFIDENCE LEVEL
-    # --------------------------------------------------------
-
-    if confidence >= 0.80:
-
-        confidence_level = "High confidence"
-
-        confidence_message = (
-            "The model shows strong probability separation "
-            "between the two classes for this image."
-        )
-
-    elif confidence >= 0.65:
-
-        confidence_level = "Moderate confidence"
-
-        confidence_message = (
-            "The model shows moderate probability separation "
-            "between the two classes for this image."
-        )
-
-    else:
-
-        confidence_level = "Low confidence"
-
-        confidence_message = (
-            "The model shows limited separation between the "
-            "two classes for this image. The prediction should "
-            "be interpreted cautiously."
-        )
+    probability_gap = abs(
+        benign_probability
+        - malignant_probability
+    )
 
     # --------------------------------------------------------
-    # PREDICTION
+    # MODEL PREDICTION
     # --------------------------------------------------------
 
     if prediction == "Benign":
@@ -765,82 +734,131 @@ def display_ai_assessment(
             "### Model Prediction: MALIGNANT"
         )
 
+    st.write("")
+
     # --------------------------------------------------------
-    # CONFIDENCE
+    # MODEL SUPPORT
     # --------------------------------------------------------
 
-    confidence_col1, confidence_col2 = st.columns(
+    support_col1, support_col2 = st.columns(
         [1, 2],
         gap="medium",
     )
 
-    with confidence_col1:
+    with support_col1:
 
         st.metric(
-            "Prediction Confidence",
-            f"{confidence * 100:.1f}%",
+            "Model Support",
+            f"{model_support * 100:.1f}%",
         )
 
-    with confidence_col2:
+    with support_col2:
 
-        if confidence_level == "High confidence":
-
-            st.success(
-                f"**{confidence_level}**"
-            )
-
-        elif confidence_level == "Moderate confidence":
+        if probability_gap < 0.10:
 
             st.warning(
-                f"**{confidence_level}**"
+                "**Close probability distribution**"
+            )
+
+        elif probability_gap < 0.20:
+
+            st.info(
+                "**Moderate probability separation**"
             )
 
         else:
 
-            st.warning(
-                f"**{confidence_level}**"
+            st.success(
+                "**Clear probability separation**"
             )
 
-    st.caption(
-        confidence_message
-    )
+    # --------------------------------------------------------
+    # INTERPRETATION
+    # --------------------------------------------------------
+
+    if probability_gap < 0.10:
+
+        st.caption(
+            "The model favors the predicted class, but the "
+            "two class probabilities are relatively close. "
+            "This indicates limited separation between the "
+            "two classes for this image."
+        )
+
+    elif probability_gap < 0.20:
+
+        st.caption(
+            "The model shows a moderate preference for the "
+            "predicted class, while some overlap remains "
+            "between the two class probabilities."
+        )
+
+    else:
+
+        st.caption(
+            "The model shows clearer probability separation "
+            "between the predicted class and the alternative class."
+        )
 
     st.write("")
 
     # --------------------------------------------------------
-    # PROBABILITIES
+    # PROBABILITY DETAILS
     # --------------------------------------------------------
 
-    prob1, prob2 = st.columns(
-        2,
-        gap="large",
-    )
+    with st.expander(
+        "Probability Details",
+        expanded=False,
+    ):
 
-    with prob1:
-
-        st.metric(
-            "Benign",
-            f"{benign_probability * 100:.1f}%",
+        prob1, prob2 = st.columns(
+            2,
+            gap="large",
         )
 
-        st.progress(
-            benign_probability
+        with prob1:
+
+            st.metric(
+                "Benign",
+                f"{benign_probability * 100:.1f}%",
+            )
+
+            st.progress(
+                benign_probability
+            )
+
+        with prob2:
+
+            st.metric(
+                "Malignant",
+                f"{malignant_probability * 100:.1f}%",
+            )
+
+            st.progress(
+                malignant_probability
+            )
+
+    # --------------------------------------------------------
+    # UNCERTAINTY NOTE
+    # --------------------------------------------------------
+
+    if probability_gap < 0.10:
+
+        st.info(
+            """
+            **Interpretation Note**
+
+            The predicted class represents the class with the
+            higher model probability. When the probabilities are
+            close, the model has limited separation between the
+            two classes and the result should therefore be
+            interpreted cautiously.
+
+            The probability distribution shown above is the
+            model's actual output and has not been artificially
+            increased to create a stronger-looking prediction.
+            """
         )
-
-    with prob2:
-
-        st.metric(
-            "Malignant",
-            f"{malignant_probability * 100:.1f}%",
-        )
-
-        st.progress(
-            malignant_probability
-        )
-
-    st.caption(
-        f"Decision threshold: {THRESHOLD:.2f}"
-    )
 
 # ============================================================
 # BBOX FROM CAM
