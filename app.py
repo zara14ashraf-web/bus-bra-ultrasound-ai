@@ -946,13 +946,59 @@ with st.sidebar:
         "Not intended for clinical diagnosis."
     )
 
-st.write("HERO TEST")
+
 # ============================================================
 # HERO
 # ============================================================
-st.title("AI-Assisted Breast Ultrasound Analysis")
-st.write("Deep Learning for Breast Lesion Classification")
-st.write("A research prototype exploring dual-view deep learning for benign and malignant breast ultrasound classification, with probability-based predictions and Grad-CAM visual explainability.")
+st.markdown(
+    """
+    <h1 style="
+        text-align: center;
+        color: #173f4d;
+        font-size: 2.45rem;
+        font-weight: 750;
+        margin: 0 0 0.35rem 0;
+        line-height: 1.2;
+    ">
+        AI-Assisted Breast Ultrasound Analysis
+    </h1>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <p style="
+        text-align: center;
+        color: #607984;
+        font-size: 1.05rem;
+        margin: 0 0 0.55rem 0;
+    ">
+        Deep Learning for Breast Lesion Classification
+    </p>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <p style="
+        text-align: center;
+        color: #71838b;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        max-width: 760px;
+        margin: 0 auto 1.5rem auto;
+    ">
+        A research prototype exploring dual-view deep learning
+        for benign and malignant breast ultrasound classification,
+        with probability-based predictions and Grad-CAM
+        visual explainability.
+    </p>
+    """,
+    unsafe_allow_html=True,
+)
+
 # ============================================================
 # DISCLAIMER
 # ============================================================
