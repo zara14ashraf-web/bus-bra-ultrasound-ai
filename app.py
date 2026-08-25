@@ -46,50 +46,46 @@ st.markdown(
 
     /* ---------- HERO ---------- */
 
-    .hero {
-        text-align: center;
-        padding: 1.8rem 1rem 1.2rem 1rem;
-        margin-bottom: 1.2rem;
-    }
+    st.markdown(
+    """
+    <div class="hero">
+        <div class="hero-title">
+            SonoInsight AI
+        </div>
 
-    .hero-title {
-        font-size: 2.7rem;
-        font-weight: 700;
-        color: #123b4a;
-        letter-spacing: -1px;
-        margin-bottom: 0.2rem;
-    }
+        <div class="hero-subtitle">
+            AI-Assisted Breast Ultrasound Analysis
+        </div>
 
-    .hero-subtitle {
-        font-size: 1.15rem;
-        color: #55717c;
-        margin-bottom: 0.8rem;
-    }
-
-    .hero-description {
-        max-width: 760px;
-        margin: auto;
-        color: #64748b;
-        font-size: 0.96rem;
-        line-height: 1.6;
-    }
+        <div class="hero-description">
+            A research prototype exploring dual-view deep learning
+            for benign and malignant breast ultrasound classification,
+            supported by visual explainability through Grad-CAM.
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+    
 
     /* ---------- DISCLAIMER ---------- */
 
-    .disclaimer {
-        background: #f8fafc;
-        border: 1px solid #dbe4ea;
-        border-radius: 12px;
-        padding: 14px 18px;
-        margin: 1rem 0 1.5rem 0;
-        color: #475569;
-        font-size: 0.88rem;
-        line-height: 1.55;
-    }
+    st.markdown(
+    """
+    <div class="disclaimer">
 
-    .disclaimer strong {
-        color: #123b4a;
-    }
+        <strong>Research & Educational Prototype</strong><br>
+
+        SonoInsight AI is developed for research and educational
+        demonstration only. It is not a medical device and should
+        not be used to diagnose, exclude, or guide treatment of
+        breast disease. AI predictions should never replace
+        assessment by a qualified healthcare professional.
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
     /* ---------- SECTION ---------- */
 
