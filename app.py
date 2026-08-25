@@ -1170,7 +1170,7 @@ if mode == "Upload Ultrasound":
         width, height = image.size
 
         st.write("")
-        # ----------------------------------------------------
+               # ----------------------------------------------------
         # IMAGE PREVIEW
         # ----------------------------------------------------
 
@@ -1189,7 +1189,9 @@ if mode == "Upload Ultrasound":
 
         with info_col:
 
-            st.markdown("#### Image Information")
+            st.markdown(
+                "#### Image Information"
+            )
 
             st.write(
                 f"**Dimensions**  \n"
@@ -1202,12 +1204,11 @@ if mode == "Upload Ultrasound":
             )
 
             st.caption(
-                "Patient-identifying information should be "
-                "removed before uploading."
+                "Please ensure patient-identifying information "
+                "has been removed before analysis."
             )
 
         st.write("")
-
         # ----------------------------------------------------
         # ANALYZE BUTTON
         # ----------------------------------------------------
